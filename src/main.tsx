@@ -8,6 +8,7 @@ import './styles/previews-a.css'
 import './styles/previews-b.css'
 import './styles/previews-c.css'
 import './styles/dialog-responsive.css'
+import './styles/themes.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

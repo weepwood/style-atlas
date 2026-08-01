@@ -28,7 +28,7 @@ export function ExtraStylePreview({ styleId }: ExtraStylePreviewProps) {
           <div className="material-top"><span>Today</span><i>●</i></div>
           <h4>Good morning,<br />build something useful.</h4>
           <div className="material-cards"><div><small>FOCUS</small><strong>4h 20m</strong></div><div><small>TASKS</small><strong>08</strong></div></div>
-          <button type="button" tabIndex={-1}>＋</button>
+          <span className="material-fab" aria-hidden="true">＋</span>
         </div>
       )
     case 'vaporwave':

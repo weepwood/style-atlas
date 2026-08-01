@@ -1,3 +1,5 @@
+import { ExtraStylePreview } from './ExtraStylePreview'
+
 interface StylePreviewProps {
   styleId: string
 }
@@ -123,6 +125,6 @@ export function StylePreview({ styleId }: StylePreviewProps) {
         </div>
       )
     default:
-      return <div className="mini-window" />
+      return <ExtraStylePreview styleId={styleId} />
   }
 }

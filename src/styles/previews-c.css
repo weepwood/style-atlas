@@ -1,0 +1,21 @@
+.preview-organic { background: #e5ead7; color: #263123; }
+.organic-ui { padding: 16px; }
+.organic-ui .mini-nav { font-family: Georgia,serif; font-size: 10px; }
+.organic-ui h4 { width: 75%; margin: 64px 0 9px; font: italic 500 42px/.88 Georgia,serif; letter-spacing: -.06em; }
+.organic-ui p { width: 62%; color: #5d6957; font-size: 8px; line-height: 1.6; }
+.organic-blob { position: absolute; right: -14px; bottom: -10px; width: 170px; height: 190px; border-radius: 61% 39% 34% 66% / 35% 43% 57% 65%; background: linear-gradient(145deg,#728e63,#31503b); }
+.organic-blob::before,.organic-blob::after { content:""; position:absolute; width:1px; background:rgba(255,255,255,.35); transform-origin:bottom; }.organic-blob::before{height:120px;left:76px;bottom:22px;transform:rotate(18deg)}.organic-blob::after{height:83px;left:98px;bottom:39px;transform:rotate(43deg)}
+.organic-seal { position: absolute; right: 78px; top: 58px; display:grid; width:66px;height:66px;place-items:center;border:1px solid #263123;border-radius:50%;font:700 7px/1.2 monospace;text-align:center;transform:rotate(10deg); }
+
+.preview-terminal { background: #10130f; color: #b7ff76; }
+.terminal-ui { border: 1px solid #36462e; background: #0b0e0a; box-shadow: 0 0 35px rgba(140,255,80,.08) inset; font-family: "SFMono-Regular",Consolas,monospace; }
+.terminal-bar { display:flex;align-items:center;gap:5px;padding:9px 11px;border-bottom:1px solid #273320;color:#66805a;font-size:7px; }.terminal-bar i{width:7px;height:7px;border-radius:50%;background:#405039}.terminal-bar span{margin-left:auto}
+.terminal-content { padding: 18px 14px; font-size: 9px; line-height: 1.75; }
+.terminal-content .prompt { color:#fff; }.terminal-content .dim{color:#5c7253}.terminal-content h4{margin:24px 0 10px;font:900 28px/1 monospace;letter-spacing:-.05em;color:#b7ff76}.terminal-cursor{display:inline-block;width:7px;height:12px;background:#b7ff76;animation:blink 1s steps(1) infinite}
+
+.preview-luxury { background: #181713; color: #e6dbc3; }
+.luxury-ui { border: 1px solid #625b4e; padding: 18px; }
+.luxury-ui .mini-nav { font: 500 7px/1 Georgia,serif; letter-spacing: .18em; }
+.luxury-monogram { position:absolute;left:50%;top:47%;display:grid;width:116px;height:116px;place-items:center;border:1px solid #8b7a5f;border-radius:50%;font:italic 500 62px/1 Georgia,serif;transform:translate(-50%,-50%); }
+.luxury-ui h4 { position:absolute;left:18px;right:18px;bottom:36px;margin:0;text-align:center;font:500 24px/1 Georgia,serif;letter-spacing:.06em;text-transform:uppercase; }
+.luxury-rule { position:absolute;left:50%;bottom:20px;width:70px;height:1px;background:#8b7a5f;transform:translateX(-50%); }

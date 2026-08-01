@@ -1,0 +1,162 @@
+import type { VisualStyle } from '../types/style'
+
+export const styles: VisualStyle[] = [
+  {
+    id: 'glass',
+    name: '玻璃拟态',
+    en: 'Glassmorphism',
+    category: ['科技', '氛围'],
+    tags: ['透明', '层次'],
+    summary: '用半透明材质、背景模糊与柔和光斑构造空间层次。',
+    lead: '玻璃拟态通过半透明面板、背景模糊和高光边缘创造轻盈的空间感，适合强调科技、未来感和高级氛围，但必须严格控制文字对比度。',
+    bestFor: ['SaaS 产品首页与功能介绍', '音乐、影像和创意工具', '少量信息的控制面板', '需要明暗主题切换的界面'],
+    risks: ['透明层过多会削弱信息层级', '低性能设备上的模糊成本较高', '复杂背景容易导致文字对比度不足'],
+    palette: ['#E5E1FF', '#FF9B8B', '#6B79FF', '#66E3CD', '#242143'],
+    tokens: { surface: 'rgba(255,255,255,.28)', blur: '18px', border: 'rgba(255,255,255,.72)', radius: '24px', shadow: '0 20px 55px rgba(71,54,120,.22)' }
+  },
+  {
+    id: 'bento',
+    name: '便当网格',
+    en: 'Bento Grid',
+    category: ['产品', '数据'],
+    tags: ['模块化', '高密度'],
+    summary: '用不同尺寸的卡片组织复杂信息，兼顾扫描效率与视觉节奏。',
+    lead: 'Bento Grid 不是单纯的卡片堆叠，而是利用尺寸差异表达优先级。它尤其适合功能多、信息密度高、需要快速扫描的产品与作品集。',
+    bestFor: ['SaaS 功能总览', '个人作品集与案例展示', '数据看板和运营后台', '产品发布页'],
+    risks: ['卡片尺寸没有语义时会显得模板化', '移动端重排需要重新设计优先级', '过多圆角与图标会造成视觉同质化'],
+    palette: ['#E9E9E5', '#191919', '#FF5F3D', '#A6C1FF', '#A7E7C0'],
+    tokens: { gridGap: '12px', cardRadius: '20px', cardPadding: '20px', darkCard: '#191919', accentCard: '#FF5F3D' }
+  },
+  {
+    id: 'brutal',
+    name: '新粗野主义',
+    en: 'Neo Brutalism',
+    category: ['创意', '品牌'],
+    tags: ['强对比', '原始感'],
+    summary: '粗边框、硬阴影与大胆排版，直接制造强烈而叛逆的品牌记忆。',
+    lead: '新粗野主义借用原始网页和印刷物的直接感，使用硬边框、高饱和颜色、错位和夸张文字。它适合态度鲜明的品牌，不适合需要安静阅读的复杂业务。',
+    bestFor: ['创意机构与设计作品集', '音乐、潮流和青年文化', '活动页与短期营销页面', '强调个性的个人主页'],
+    risks: ['强烈视觉会迅速造成疲劳', '边框、阴影和颜色必须建立统一规则', '对金融、医疗等严肃场景可能不合适'],
+    palette: ['#FFDD00', '#101010', '#FFFDF3', '#FF4C34', '#4978FF'],
+    tokens: { border: '4px solid #101010', hardShadow: '10px 10px 0 #101010', radius: '0px', accent: '#FFDD00', headingWeight: '900' }
+  },
+  {
+    id: 'aurora',
+    name: '极光界面',
+    en: 'Aurora UI',
+    category: ['科技', '氛围'],
+    tags: ['渐变', '深色'],
+    summary: '将模糊的多色光带置于深色空间中，形成流动、沉浸的科技氛围。',
+    lead: 'Aurora UI 以深色背景承载大面积柔化渐变，通常配合轻透明面板与精细边框。它适合营造未来感，但内容层级仍需依靠清晰的排版完成。',
+    bestFor: ['AI、Web3 与开发者产品', '发布会和沉浸式专题页', '音乐与数字艺术产品', '高端科技品牌首页'],
+    risks: ['渐变过亮会影响文字可读性', '大面积滤镜可能增加 GPU 开销', '容易沦为缺乏品牌差异的通用科技风'],
+    palette: ['#0E1026', '#5658FF', '#E45CFF', '#54E8D1', '#F6F4FF'],
+    tokens: { background: '#0E1026', glowA: '#5658FF', glowB: '#E45CFF', panel: 'rgba(13,16,38,.58)', border: 'rgba(255,255,255,.18)' }
+  },
+  {
+    id: 'clay',
+    name: '黏土拟态',
+    en: 'Claymorphism',
+    category: ['趣味', '产品'],
+    tags: ['柔软', '3D'],
+    summary: '圆润体块、内外阴影与低攻击性配色，带来可触摸的玩具感。',
+    lead: '黏土拟态用圆润形状、柔和体积光和厚实阴影模拟软质 3D 物体。它能显著提高亲和力，适合轻量、教育和年轻化产品。',
+    bestFor: ['儿童教育与学习产品', '健康、习惯和生活方式应用', '轻量游戏与虚拟角色', '品牌吉祥物展示'],
+    risks: ['复杂阴影会增加实现和维护成本', '组件过度圆润可能削弱信息效率', '不适合承载超高密度表格与后台任务'],
+    palette: ['#D8ECFF', '#FF9A92', '#33425D', '#ECF6FF', '#8BA7C7'],
+    tokens: { radius: '28px', highlight: 'inset 10px 10px 20px rgba(255,255,255,.48)', depth: '16px 18px 32px rgba(80,113,160,.25)', surface: '#ECF6FF', accent: '#FF9A92' }
+  },
+  {
+    id: 'editorial',
+    name: '编辑排版',
+    en: 'Editorial',
+    category: ['内容', '品牌'],
+    tags: ['衬线', '杂志感'],
+    summary: '以版式、留白和图文节奏为核心，让网页像一份可阅读的数字刊物。',
+    lead: '编辑排版强调字体层级、栏宽、图片裁切和留白节奏，视觉重点不是装饰组件，而是内容本身。适合长文、品牌故事和文化内容。',
+    bestFor: ['数字杂志与独立媒体', '品牌故事与年度报告', '文化、建筑和时尚网站', '深度专题与长文阅读'],
+    risks: ['中文衬线字体的加载与适配较复杂', '移动端需要重做阅读节奏', '过度追求杂志感可能牺牲操作效率'],
+    palette: ['#F2EEE5', '#1B1B19', '#D55733', '#BDC8AF', '#8A857C'],
+    tokens: { serif: 'Georgia, serif', textWidth: '68ch', rule: '1px solid currentColor', headlineTracking: '-0.055em', paper: '#F2EEE5' }
+  },
+  {
+    id: 'swiss',
+    name: '瑞士国际主义',
+    en: 'Swiss Style',
+    category: ['内容', '产品'],
+    tags: ['网格', '理性'],
+    summary: '严谨网格、无衬线字体和克制配色，建立清晰而可信的信息秩序。',
+    lead: '瑞士国际主义强调客观、清晰和结构化，通过网格、非对称布局、无衬线字体与有限配色组织信息，是长期稳定且适应性极强的设计方法。',
+    bestFor: ['企业官网和专业服务', '公共信息与数据发布', '设计系统和产品文档', '文化机构与展览信息'],
+    risks: ['缺少内容策略时容易显得冷淡', '网格过于严格会限制表现力', '排版细节不足时会看起来像未完成稿'],
+    palette: ['#F7F7F5', '#111111', '#FF2B21', '#C9C9C5', '#6F6F6A'],
+    tokens: { grid: '12 columns', accent: '#FF2B21', font: 'Arial, sans-serif', border: '#C9C9C5', radius: '0px' }
+  },
+  {
+    id: 'cyber',
+    name: '赛博终端',
+    en: 'Cyberpunk',
+    category: ['科技', '创意'],
+    tags: ['霓虹', '故障感'],
+    summary: '深黑背景、荧光色、终端字体与切角结构，营造高能量未来叙事。',
+    lead: '赛博朋克风格通过高反差荧光色、扫描线、切角、故障文字和技术符号构建强烈世界观，最适合沉浸式体验与娱乐内容。',
+    bestFor: ['游戏、电竞与数字娱乐', '安全、开发者和实验性工具', '科幻活动页与作品集', '音乐视觉与互动叙事'],
+    risks: ['长时间阅读体验较差', '颜色闪烁和动效需考虑光敏感用户', '过多装饰会掩盖真实功能'],
+    palette: ['#070909', '#D5FF38', '#FF2FAC', '#365038', '#9BB39F'],
+    tokens: { background: '#070909', neon: '#D5FF38', glitch: '#FF2FAC', font: 'monospace', cutCorner: 'polygon(0 0,92% 0,100% 9%,100% 100%,8% 100%,0 91%)' }
+  },
+  {
+    id: 'y2k',
+    name: 'Y2K 复古未来',
+    en: 'Y2K Revival',
+    category: ['趣味', '创意'],
+    tags: ['千禧', '怀旧'],
+    summary: '金属球体、糖果渐变和早期互联网符号，重建乐观的复古未来感。',
+    lead: 'Y2K 风格融合 1990 年代末到 2000 年代初的数字乐观主义：半透明塑料、铬金属、像素符号、糖果色与夸张字体。',
+    bestFor: ['时尚、美妆与潮流品牌', '音乐、娱乐与粉丝社区', '年轻化活动页', '实验性个人主页'],
+    risks: ['容易依赖装饰而缺少结构', '对年龄层和文化语境较敏感', '渐变、阴影和字体需要节制'],
+    palette: ['#D9F6FF', '#F6D7FF', '#FFF7B7', '#8D78FF', '#242044'],
+    tokens: { chrome: 'linear-gradient(135deg,#fff,#C5E5FF,#8D78FF)', candyA: '#F6D7FF', candyB: '#D9F6FF', radius: '26px', shadow: '2px 2px #FF8BD7,4px 4px #6CE7FF' }
+  },
+  {
+    id: 'organic',
+    name: '有机自然主义',
+    en: 'Organic Design',
+    category: ['品牌', '氛围'],
+    tags: ['自然', '柔和'],
+    summary: '自然色、非规则轮廓和呼吸感留白，传达温和、可持续与手作气质。',
+    lead: '有机自然主义用低饱和自然色、非规则曲线、植物形态和带有人情味的排版弱化数字产品的机械感，适合强调健康、生态与生活方式。',
+    bestFor: ['食品、咖啡与生活方式品牌', '可持续发展与环保项目', '心理健康与疗愈产品', '精品民宿和旅行体验'],
+    risks: ['“自然色 + 叶子”容易形成套路', '低对比配色必须通过可访问性检查', '不规则形状不应破坏布局对齐'],
+    palette: ['#E5EAD7', '#263123', '#728E63', '#31503B', '#C88D68'],
+    tokens: { background: '#E5EAD7', ink: '#263123', forest: '#31503B', blobRadius: '61% 39% 34% 66% / 35% 43% 57% 65%', serif: 'Georgia, serif' }
+  },
+  {
+    id: 'terminal',
+    name: '开发者终端',
+    en: 'Terminal UI',
+    category: ['科技', '内容'],
+    tags: ['等宽', '命令行'],
+    summary: '通过等宽字体、命令提示符和日志结构，建立直接、可信的开发者语境。',
+    lead: '终端风格不等于把一切变成绿色文字。它的核心是结构化状态、命令反馈、等宽节奏与工具感，适合面向开发者的文档、产品和作品集。',
+    bestFor: ['开发者工具与 API 产品', '技术文档和命令演示', '安全、运维和基础设施产品', '工程师个人主页'],
+    risks: ['大量等宽文字会降低普通用户阅读效率', '黑绿配色容易陷入陈词滥调', '必须保留清晰的导航与图形反馈'],
+    palette: ['#10130F', '#B7FF76', '#FFFFFF', '#36462E', '#66805A'],
+    tokens: { background: '#0B0E0A', text: '#B7FF76', dim: '#66805A', font: 'Consolas, monospace', border: '#36462E' }
+  },
+  {
+    id: 'luxury',
+    name: '奢华极简',
+    en: 'Luxury Minimalism',
+    category: ['品牌', '内容'],
+    tags: ['克制', '精致'],
+    summary: '以高质量字体、极少配色和精确留白营造稀缺、安静的高级感。',
+    lead: '奢华极简依靠比例、材质感、摄影和字体细节，而不是堆叠金色装饰。界面元素少，但每一个间距、字距和过渡都需要精确控制。',
+    bestFor: ['高端酒店、珠宝与时装', '建筑与室内设计工作室', '精品品牌和限量产品', '艺术家与摄影师作品集'],
+    risks: ['缺少高质量内容时会显得空洞', '过度留白可能降低信息效率', '细字体与低对比配色需注意可读性'],
+    palette: ['#181713', '#E6DBC3', '#8B7A5F', '#625B4E', '#F4F0E8'],
+    tokens: { background: '#181713', ivory: '#E6DBC3', gold: '#8B7A5F', letterSpacing: '.16em', motion: '900ms cubic-bezier(.2,.8,.2,1)' }
+  }
+];
+
+export const categories = ['全部', '产品', '品牌', '内容', '科技', '创意', '氛围', '趣味', '数据', '收藏'] as const

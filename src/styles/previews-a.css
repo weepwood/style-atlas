@@ -1,0 +1,41 @@
+.preview-glass {
+  background: radial-gradient(circle at 20% 20%, #ff9b8b, transparent 28%), radial-gradient(circle at 82% 25%, #b090ff, transparent 30%), radial-gradient(circle at 55% 90%, #66e3cd, transparent 34%), #e5e1ff;
+}
+.preview-glass::before, .preview-glass::after { content: ""; position: absolute; border-radius: 50%; filter: blur(3px); }
+.preview-glass::before { width: 160px; height: 160px; left: -30px; bottom: -40px; background: #ffea71; }
+.preview-glass::after { width: 100px; height: 100px; right: -15px; top: 70px; background: #6b79ff; }
+.glass-ui { padding: 18px; border: 1px solid rgba(255,255,255,.8); border-radius: 24px; background: rgba(255,255,255,.28); backdrop-filter: blur(17px); box-shadow: 0 20px 50px rgba(83,67,121,.24); }
+.glass-ui .mini-nav { color: #2b2850; font-size: 10px; font-weight: 800; }
+.glass-ui .dots { display: flex; gap: 4px; }.glass-ui .dots i { width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+.glass-ui h4 { width: 70%; margin: 72px 0 18px; color: #242143; font-family: Georgia, serif; font-size: 38px; font-weight: 500; line-height: .92; letter-spacing: -.06em; }
+.glass-ui .glass-cta { display: inline-flex; padding: 9px 12px; border-radius: 999px; background: rgba(255,255,255,.55); color: #29264c; font-size: 9px; font-weight: 900; }
+
+.preview-bento { background: #e9e9e5; }
+.bento-ui { display: grid; grid-template-columns: 1.2fr .8fr; grid-template-rows: 1fr .76fr; gap: 8px; }
+.bento-ui > div { border-radius: 17px; overflow: hidden; }
+.bento-main { grid-row: span 2; padding: 18px; background: #191919; color: #fff; }
+.bento-main strong { display: block; margin-top: 64px; font-size: 38px; line-height: .88; letter-spacing: -.07em; }
+.bento-main span { font-size: 9px; opacity: .55; }
+.bento-accent { position: relative; background: #ff5f3d; }
+.bento-accent::before { content: "↗"; position: absolute; right: 14px; top: 10px; font-size: 24px; }
+.bento-accent::after { content: "48%"; position: absolute; left: 14px; bottom: 10px; font-size: 27px; font-weight: 900; }
+.bento-chart { display: flex; align-items: end; justify-content: space-around; gap: 6px; padding: 14px; background: #a6c1ff; }
+.bento-chart i { width: 12%; border-radius: 6px 6px 2px 2px; background: #171717; }.bento-chart i:nth-child(1){height:32%}.bento-chart i:nth-child(2){height:70%}.bento-chart i:nth-child(3){height:46%}.bento-chart i:nth-child(4){height:88%}.bento-chart i:nth-child(5){height:62%}
+
+.preview-brutal { padding: 14px; background: #ffdd00; color: #101010; }
+.brutal-ui { border: 4px solid #101010; background: #fffdf3; box-shadow: 10px 10px 0 #101010; }
+.brutal-ui .mini-nav { padding: 10px 12px; border-bottom: 4px solid #101010; font: 900 10px/1 monospace; }
+.brutal-ui h4 { margin: 22px 12px 12px; font-size: 45px; line-height: .78; letter-spacing: -.09em; transform: scaleY(1.15); transform-origin: left; }
+.brutal-sticker { display: inline-block; margin: 20px 0 0 12px; padding: 7px 9px; border: 3px solid #101010; background: #ff4c34; color: #fff; font: 900 9px/1 monospace; transform: rotate(-4deg); }
+.brutal-footer { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; justify-content: space-between; border-top: 3px solid #101010; padding-top: 7px; font: 900 8px/1 monospace; }
+
+.preview-aurora { background: #0e1026; }
+.preview-aurora::before { content: ""; position: absolute; inset: -30%; background: conic-gradient(from 50deg, transparent, #5658ff 18%, #e45cff 31%, transparent 48%, #54e8d1 70%, transparent); filter: blur(30px); opacity: .92; animation: spin 14s linear infinite; }
+.aurora-ui { padding: 19px; border-radius: 23px; background: rgba(13,16,38,.58); border: 1px solid rgba(255,255,255,.18); color: #f6f4ff; backdrop-filter: blur(18px); }
+.aurora-ui .mini-nav { font-size: 9px; }.aurora-ui .mini-nav span:last-child { padding: 7px 9px; border: 1px solid rgba(255,255,255,.25); border-radius: 99px; }
+.aurora-ui h4 { margin: 68px 0 10px; font-size: 36px; line-height: .9; letter-spacing: -.06em; }
+.aurora-ui p { width: 76%; margin: 0; color: rgba(255,255,255,.58); font-size: 9px; line-height: 1.6; }
+.aurora-ring { position: absolute; right: 20px; bottom: 20px; width: 74px; height: 74px; border: 12px solid rgba(255,255,255,.1); border-top-color: #fff; border-radius: 50%; }
+
+.preview-clay { background: #d8ecff; }
+.clay-ui { padding: 18px; color: #33425d; }

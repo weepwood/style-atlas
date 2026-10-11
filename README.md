@@ -46,6 +46,15 @@ GitHub Pages：<https://weepwood.github.io/style-atlas/>
 - 源码为 `public/frame-lab/index.html`，独立原生 HTML/CSS/JavaScript；Vite 构建时原样复制到 `dist/frame-lab/index.html`。
 - Dribbble 风格属于教学归纳，非实时热榜；界面是原创示例，附相关作品与 Figma 官方学习链接。
 
+## 个人 Design Token Studio（2026-10-11）
+
+- 主页面的 Design Token Studio 复用现有 30 种风格作为预设，不改变原有主题选择行为。
+- 7 个可调整语义色，组件圆角、信息密度、字体、动效开关；浏览器本地保存配置。
+- 包含可交互的 Dashboard / 组件预览与三组 WCAG 文字对比度检查。
+- 导出 CSS Variables、DTCG JSON、Tailwind CSS v4 和 WPF XAML。
+- 代码：`src/data/tokenSystem.ts`、`src/components/TokenStudio.tsx`、`src/components/token-studio.css`。
+- 编辑器与预览相互隔离，调整工作台 Token 不会自动覆盖网站当前主题。
+
 ## 技术栈
 
 - React 19

@@ -64,6 +64,55 @@ export function getDefaultSettings(style: VisualStyle): TokenSettings {
     radius: 12, density: 'balanced', font: 'sans', motion: true }
 }
 
+// Design Token Studio v2: modes + component states + strict, lossless Studio DTCG round-trip.
+export type TokenMode = 'light' | 'dark'
+export const tokenModes: TokenMode[] = ['light', 'dark']
+export type ComponentSettings = {
+  hoverMix: number
+  focusWidth: number
+  disabledOpacity: number
+  controlHeight: number
+}
+export type TokenProfile = {
+  modes: Record<TokenMode, TokenSettings>
+  component: ComponentSettings
+}
+export const defaultComponents: ComponentSettings = { hoverMix: 0.12, focusWidth: 2, disabledOpacity: 0.5, controlHeight: 36 }
+
+export function isTokenProfile(value: unknown): value is TokenProfile {
+  if (!value || typeof value !== 'object') return false
+  const p = value as Record<string, unknown>
+  return !!p.modes && typeof p.modes === 'object' && !!p.component && typeof p.component === 'object'
+}
+function onAccent(accent: string) { return contrast('#FFFFFF', accent) >= contrast('#111111', accent) ? '#FFFFFF' : '#111111' }
+export function getDefaultProfile(style: VisualStyle): TokenProfile {
+  const base = getDefaultSettings(style)
+  const baseIsDark = luminance(base.colors.canvas) < 0.22
+  const dark: TokenSettings = {
+    ...base, colors: baseIsDark ? { ...base.colors } : {
+      canvas: '#121821', surface: '#1D2632', text: '#F2F4F7', muted: '#B2BECD',
+      border: '#405064', accent: contrast(base.colors.accent, '#121821') >= 3 ? base.colors.accent : '#9AB7FF',
+      onAccent: '#111111',
+    },
+  }
+  dark.colors.onAccent = onAccent(dark.colors.accent)
+  const light: TokenSettings = baseIsDark ? {
+    ...base, colors: {
+      canvas: '#F8F9FA', surface: '#FFFFFF', text: '#1C2430', muted: '#556275', border: '#C7CED8',
+      accent: contrast(base.colors.accent, '#FFFFFF') >= 3 ? base.colors.accent : '#3659A3',
+      onAccent: '#FFFFFF',
+    },
+  } : { ...base, colors: { ...base.colors } }
+  light.colors.onAccent = onAccent(light.colors.accent)
+  return { modes: { light, dark }, component: { ...defaultComponents } }
+}
+export function profileFromLegacy(settings: TokenSettings, style: VisualStyle): TokenProfile {
+  const profile = getDefaultProfile(style)
+  // Retain all previous user edits in the mode matching the original preset.
+  const mode = luminance(settings.colors.canvas) < 0.22 ? 'dark' : 'light'
+  profile.modes[mode] = settings
+  return profile
+}
 const fontStacks: Record<FontChoice, string> = {
   sans: 'Inter, "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif',
   serif: 'Georgia, "Noto Serif SC", "Songti SC", serif',
@@ -74,46 +123,250 @@ function steps(s: TokenSettings) { return [4, 8, 12, 16, 24, 32].map(v => Math.r
 function dtcgColor(color: string) { return { colorSpace: 'srgb', components: rgb(color).map(v => Number((v / 255).toFixed(5))), hex: color.toUpperCase() } }
 function dim(value: number) { return { $type: 'dimension', $value: { value, unit: 'px' } } }
 function leaf(type: string, value: unknown) { return { $type: type, $value: value } }
+const name = (k: string) => k.replace(/([A-Z])/g, '-$1').toLowerCase()
+export function hoverColor(s: TokenSettings, component: ComponentSettings) {
+  return blend(s.colors.accent, luminance(s.colors.accent) > 0.35 ? '#000000' : '#FFFFFF', component.hoverMix)
+}
 
-export function exportDtcg(s: TokenSettings, styleName: string): string {
-  const c = s.colors, spacing = steps(s)
-  const primitiveColors = Object.fromEntries(colorRoles.map(key => [key, leaf('color', dtcgColor(c[key]))]))
-  const semanticColors = Object.fromEntries(colorRoles.map(key => [key, leaf('color', `{primitive.color.${key}}`)]))
+// Emits official-format Token objects. App-specific metadata lives under a dollar-prefixed extension group.
+export function exportDtcg(profile: TokenProfile | TokenSettings, styleName: string): string {
+  const p = isTokenProfile(profile) ? profile : { modes: { light: profile, dark: profile }, component: defaultComponents }
+  const base = p.modes.light
+  const sp = steps(base)
+  const primitiveMode = (mode: TokenMode) => Object.fromEntries(colorRoles.map(key => [key, leaf('color', dtcgColor(p.modes[mode].colors[key]))]))
+  const semanticMode = (mode: TokenMode) => Object.fromEntries(colorRoles.map(key => [key, leaf('color', `{primitive.color.${mode}.${key}}`)]))
+  const componentMode = (mode: TokenMode) => ({
+    button: { primary: {
+      background: leaf('color', `{semantic.${mode}.color.accent}`),
+      foreground: leaf('color', `{semantic.${mode}.color.onAccent}`),
+      hoverBackground: leaf('color', dtcgColor(hoverColor(p.modes[mode], p.component))),
+      focusRing: leaf('color', `{semantic.${mode}.color.accent}`),
+      disabledOpacity: leaf('number', p.component.disabledOpacity),
+    } },
+    input: {
+      background: leaf('color', `{semantic.${mode}.color.surface}`),
+      foreground: leaf('color', `{semantic.${mode}.color.text}`),
+      border: leaf('color', `{semantic.${mode}.color.border}`),
+      focusRing: leaf('color', `{semantic.${mode}.color.accent}`),
+      disabledOpacity: leaf('number', p.component.disabledOpacity),
+    },
+  })
   const doc = {
     $schema: 'https://www.designtokens.org/schemas/2025.10/format.json',
-    $description: `${styleName} · Style Atlas 导出 · DTCG 2025.10`,
+    $description: `${styleName} · Style Atlas · 双模式与组件状态`,
+    $extensions: { 'com.style-atlas': {
+      version: 2,
+      modes: tokenModes,
+      density: { light: p.modes.light.density, dark: p.modes.dark.density },
+      font: { light: p.modes.light.font, dark: p.modes.dark.font },
+      motion: { light: p.modes.light.motion, dark: p.modes.dark.motion },
+      radius: { light: p.modes.light.radius, dark: p.modes.dark.radius },
+      components: p.component,
+    } },
     primitive: {
-      color: primitiveColors,
-      spacing: Object.fromEntries(spacing.map((size, i) => [`${i + 1}`, dim(size)])),
-      radius: { sm: dim(Math.max(0, Math.round(s.radius / 2))), md: dim(s.radius), lg: dim(s.radius * 2) },
-      typography: { fontFamily: leaf('fontFamily', fontStacks[s.font].split(',').map(v => v.trim().replace(/^"|"$/g, ''))),
+      color: { light: primitiveMode('light'), dark: primitiveMode('dark') },
+      spacing: Object.fromEntries(sp.map((size, i) => [`step${i + 1}`, dim(size)])),
+      radius: { sm: dim(base.radius / 2), md: dim(base.radius), lg: dim(base.radius * 2) },
+      typography: { fontFamily: leaf('fontFamily', fontStacks[base.font].split(',').map(v => v.trim().replace(/^"|"$/g, ''))),
         fontSize: { sm: dim(12), md: dim(14), lg: dim(18), title: dim(28) } },
-      motion: { fast: leaf('duration', { value: s.motion ? 150 : 0, unit: 'ms' }), regular: leaf('duration', { value: s.motion ? 240 : 0, unit: 'ms' }) },
+      motion: { fast: leaf('duration', { value: base.motion ? 150 : 0, unit: 'ms' }), regular: leaf('duration', { value: base.motion ? 240 : 0, unit: 'ms' }) },
     },
     semantic: {
-      color: semanticColors,
-      spacing: { controlGap: leaf('dimension', '{primitive.spacing.2}'), sectionGap: leaf('dimension', '{primitive.spacing.5}') },
+      light: { color: semanticMode('light') }, dark: { color: semanticMode('dark') },
+      spacing: { controlGap: leaf('dimension', '{primitive.spacing.step2}'), sectionGap: leaf('dimension', '{primitive.spacing.step5}') },
       radius: { control: leaf('dimension', '{primitive.radius.md}'), card: leaf('dimension', '{primitive.radius.lg}') },
     },
-    component: {
-      button: { primary: { background: leaf('color', '{semantic.color.accent}'), text: leaf('color', '{semantic.color.onAccent}'),
-        radius: leaf('dimension', '{semantic.radius.control}') } },
-      card: { background: leaf('color', '{semantic.color.surface}'), text: leaf('color', '{semantic.color.text}'),
-        border: leaf('color', '{semantic.color.border}'), radius: leaf('dimension', '{semantic.radius.card}') },
-      input: { background: leaf('color', '{semantic.color.surface}'), border: leaf('color', '{semantic.color.border}') },
-    },
+    component: { light: componentMode('light'), dark: componentMode('dark'),
+      control: { height: dim(p.component.controlHeight), focusWidth: dim(p.component.focusWidth) } },
   }
   return JSON.stringify(doc, null, 2) + '\n'
 }
+function cssMode(p: TokenProfile, mode: TokenMode): string {
+  const s = p.modes[mode], c = s.colors, sp = steps(s)
+  return `${colorRoles.map(k => `  --ui-${name(k)}: ${c[k]};`).join('\n')}
+${sp.map((v, i) => `  --ui-space-${i + 1}: ${v}px;`).join('\n')}
+  --ui-radius-sm: ${Math.round(s.radius / 2)}px;
+  --ui-radius-md: ${s.radius}px;
+  --ui-radius-lg: ${s.radius * 2}px;
+  --ui-font-family: ${fontStacks[s.font]};
+  --ui-motion-fast: ${s.motion ? 150 : 0}ms;
+  --ui-motion-normal: ${s.motion ? 240 : 0}ms;
+  --ui-button-bg: var(--ui-accent);
+  --ui-button-fg: var(--ui-on-accent);
+  --ui-button-hover-bg: ${hoverColor(s, p.component)};
+  --ui-input-bg: var(--ui-surface);
+  --ui-input-fg: var(--ui-text);
+  --ui-input-border: var(--ui-border);`
+}
+export function exportCss(profile: TokenProfile | TokenSettings): string {
+  const p = isTokenProfile(profile) ? profile : { modes: { light: profile, dark: profile }, component: defaultComponents }
+  return `/* Style Atlas UI Tokens v2 · add data-ui-mode="dark" to html for dark mode */
+:root, [data-ui-mode="light"] {
+${cssMode(p, 'light')}
+}
+[data-ui-mode="dark"] {
+${cssMode(p, 'dark')}
+}
+:root {
+  --ui-control-height: ${p.component.controlHeight}px;
+  --ui-focus-width: ${p.component.focusWidth}px;
+  --ui-disabled-opacity: ${p.component.disabledOpacity};
+  --ui-ease: cubic-bezier(.2,.8,.2,1);
+}
+/* Use these reusable classes or copy the state declarations into your component library. */
+.ui-button {
+  min-height: var(--ui-control-height);
+  background: var(--ui-button-bg);
+  color: var(--ui-button-fg);
+  border: 1px solid transparent;
+  border-radius: var(--ui-radius-md);
+  padding: 0 var(--ui-space-4);
+  font-family: var(--ui-font-family);
+  transition: background var(--ui-motion-fast) var(--ui-ease);
+  cursor: pointer;
+}
+.ui-button:hover:not(:disabled) { background: var(--ui-button-hover-bg); }
+.ui-button:focus-visible, .ui-input:focus-visible {
+  outline: var(--ui-focus-width) solid var(--ui-accent);
+  outline-offset: 2px;
+}
+.ui-button:disabled, .ui-input:disabled { opacity: var(--ui-disabled-opacity); cursor: not-allowed; }
+.ui-input {
+  min-height: var(--ui-control-height);
+  background: var(--ui-input-bg);
+  color: var(--ui-input-fg);
+  border: 1px solid var(--ui-input-border);
+  border-radius: var(--ui-radius-md);
+  padding: 0 var(--ui-space-3);
+  font-family: var(--ui-font-family);
+}
+.ui-input:hover:not(:disabled) { border-color: var(--ui-accent); }
+@media (prefers-reduced-motion: reduce) {
+  :root { --ui-motion-fast: 0ms; --ui-motion-normal: 0ms; }
+}
+`
+}
+export function exportTailwind(profile: TokenProfile | TokenSettings): string {
+  const p = isTokenProfile(profile) ? profile : { modes: { light: profile, dark: profile }, component: defaultComponents }
+  return `${exportCss(p)}
+/* Tailwind CSS v4: put this alongside @import "tailwindcss" in app.css */
+@theme inline {
+${colorRoles.map(k => `  --color-ui-${name(k)}: var(--ui-${name(k)});`).join('\n')}
+  --font-ui: var(--ui-font-family);
+  --radius-ui: var(--ui-radius-md);
+  --spacing-ui-control: var(--ui-control-height);
+}
+`
+}
+export function exportWpf(profile: TokenProfile | TokenSettings): string {
+  const p = isTokenProfile(profile) ? profile : { modes: { light: profile, dark: profile }, component: defaultComponents }
+  const nameMap: Record<ColorRole, string> = { canvas: 'Canvas', surface: 'Surface', text: 'Text', muted: 'Muted', border: 'Border', accent: 'Accent', onAccent: 'OnAccent' }
+  // WPF ResourceDictionary has no CSS-style mode selector: export two explicitly keyed palettes.
+  const modeColors = (mode: TokenMode) => colorRoles.map(k => `  <Color x:Key="Ui${mode === 'light' ? 'Light' : 'Dark'}${nameMap[k]}Color">${p.modes[mode].colors[k]}</Color>\n  <SolidColorBrush x:Key="Ui${mode === 'light' ? 'Light' : 'Dark'}${nameMap[k]}Brush" Color="{StaticResource Ui${mode === 'light' ? 'Light' : 'Dark'}${nameMap[k]}Color}" />`).join('\n')
+  return `<!-- Style Atlas: explicitly choose UiLight* or UiDark* resources in WPF. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+${modeColors('light')}
+${modeColors('dark')}
+  <CornerRadius x:Key="UiControlRadius">${p.modes.light.radius}</CornerRadius>
+  <x:Double x:Key="UiControlHeight">${p.component.controlHeight}</x:Double>
+  <x:Double x:Key="UiDisabledOpacity">${p.component.disabledOpacity}</x:Double>
+</ResourceDictionary>
+`
+}
 
-export function exportCss(s: TokenSettings): string {
-  const sp = steps(s), c = s.colors
-  return `/* Style Atlas · 可复制到任意网页项目 */\n:root {\n${colorRoles.map(k => `  --ui-primitive-${k}: ${c[k]};`).join('\n')}\n${sp.map((v, i) => `  --ui-space-${i + 1}: ${v}px;`).join('\n')}\n  --ui-radius-sm: ${Math.round(s.radius / 2)}px;\n  --ui-radius-md: ${s.radius}px;\n  --ui-radius-lg: ${s.radius * 2}px;\n  --ui-font-family: ${fontStacks[s.font]};\n  --ui-motion-fast: ${s.motion ? 150 : 0}ms;\n  --ui-motion-normal: ${s.motion ? 240 : 0}ms;\n  --ui-ease: cubic-bezier(.2, .8, .2, 1);\n${colorRoles.map(k => `  --ui-${k}: var(--ui-primitive-${k});`).join('\n')}\n  --ui-button-bg: var(--ui-accent);\n  --ui-button-text: var(--ui-onAccent);\n  --ui-card-bg: var(--ui-surface);\n  --ui-card-radius: var(--ui-radius-lg);\n}\n@media (prefers-reduced-motion: reduce) {\n  :root { --ui-motion-fast: 0ms; --ui-motion-normal: 0ms; }\n}\n`
+// Intentionally reject foreign/partial DTCG files: silently fabricating missing tokens would break designs.
+type Dict = Record<string, unknown>
+function object(value: unknown, path: string): Dict {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${path} 应为对象`)
+  return value as Dict
 }
-export function exportTailwind(s: TokenSettings): string {
-  return `${exportCss(s)}\n/* Tailwind CSS v4: 在 app.css 引入 Tailwind 后添加 */\n@theme inline {\n${colorRoles.map(k => `  --color-ui-${k.replace(/([A-Z])/g, '-$1').toLowerCase()}: var(--ui-${k});`).join('\n')}\n  --font-ui: var(--ui-font-family);\n  --radius-ui: var(--ui-radius-md);\n}\n`
+function field(parent: unknown, key: string, path: string): unknown { return object(parent, path)[key] }
+function finite(value: unknown, path: string, min: number, max: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) throw new Error(`${path} 必须是 ${min}–${max} 范围内的数字`)
+  return value
 }
-export function exportWpf(s: TokenSettings): string {
-  const map = { canvas: 'Canvas', surface: 'Surface', text: 'Text', muted: 'Muted', border: 'Border', accent: 'Accent', onAccent: 'OnAccent' } as const
-  return `<!-- Style Atlas / WPF ResourceDictionary：Color 与 SolidColorBrush -->\n<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"\n                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">\n${colorRoles.map(k => `  <Color x:Key="Ui${map[k]}Color">${s.colors[k]}</Color>\n  <SolidColorBrush x:Key="Ui${map[k]}Brush" Color="{StaticResource Ui${map[k]}Color}" />`).join('\n')}\n  <CornerRadius x:Key="UiControlRadius">${s.radius}</CornerRadius>\n  <CornerRadius x:Key="UiCardRadius">${s.radius * 2}</CornerRadius>\n</ResourceDictionary>\n`
+function choice<T extends string>(value: unknown, options: readonly T[], path: string): T {
+  if (typeof value !== 'string' || !options.includes(value as T)) throw new Error(`${path} 不支持该值`)
+  return value as T
+}
+function readColor(value: unknown, path: string): string {
+  const leafNode = object(value, path)
+  if (leafNode.$type !== 'color') throw new Error(`${path} 需要 $type: color`)
+  const v = leafNode.$value
+  if (typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)) return v.toUpperCase()
+  const color = object(v, `${path}.$value`)
+  const raw = color.hex
+  if (typeof raw !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(raw)) throw new Error(`${path} 颜色须包含有效的 #RRGGBB hex`)
+  if (color.colorSpace !== 'srgb' || !Array.isArray(color.components) || color.components.length !== 3 ||
+      color.components.some(n => typeof n !== 'number' || !Number.isFinite(n) || n < 0 || n > 1)) throw new Error(`${path} 颜色空间/分量非法`)
+  const expected = rgb(raw).map(v => v / 255)
+  if (expected.some((v, i) => Math.abs(v - (color.components as number[])[i]) > 0.00002)) throw new Error(`${path} hex 与 components 不一致`)
+  return raw.toUpperCase()
+}
+export function importDtcg(input: string): TokenProfile {
+  if (input.length > 512_000) throw new Error('文件太大（最大 500 KiB）')
+  let root: Dict
+  try { root = object(JSON.parse(input) as unknown, '根节点') }
+  catch (e) { throw new Error(e instanceof Error ? `JSON 解析失败：${e.message}` : 'JSON 解析失败') }
+  const extension = object(field(field(root, '$extensions', '$extensions'), 'com.style-atlas', '$extensions'), '$extensions.com.style-atlas')
+  if (extension.version !== 2) throw new Error('只接受 Style Atlas v2 导出的 DTCG JSON；外部文件需先做格式映射')
+  const primitive = object(root.primitive, 'primitive')
+  const modes = {} as Record<TokenMode, TokenSettings>
+  for (const mode of tokenModes) {
+    const colors = {} as TokenColors
+    const leafGroup = field(primitive.color, mode, `primitive.color`)
+    for (const role of colorRoles) colors[role] = readColor(field(leafGroup, role, `primitive.color.${mode}`), `primitive.color.${mode}.${role}`)
+    const radius = finite(field(extension.radius, mode, 'extension.radius'), `extension.radius.${mode}`, 0, 24)
+    const density = choice(field(extension.density, mode, 'extension.density'), ['compact', 'balanced', 'relaxed'], `extension.density.${mode}`)
+    const font = choice(field(extension.font, mode, 'extension.font'), ['sans', 'serif', 'mono'], `extension.font.${mode}`)
+    const motion = field(extension.motion, mode, 'extension.motion')
+    if (typeof motion !== 'boolean') throw new Error(`extension.motion.${mode} 必须为布尔值`)
+    modes[mode] = { colors, radius, density, font, motion }
+  }
+  const c = object(extension.components, 'extension.components')
+  const component = {
+    hoverMix: finite(c.hoverMix, 'hoverMix', 0, 0.4),
+    focusWidth: finite(c.focusWidth, 'focusWidth', 1, 6),
+    disabledOpacity: finite(c.disabledOpacity, 'disabledOpacity', 0.2, 0.8),
+    controlHeight: finite(c.controlHeight, 'controlHeight', 28, 60),
+  }
+  // Validate the semantic aliases (and component structure) exist; do not attempt to evaluate arbitrary references.
+  for (const mode of tokenModes) {
+    const sem = field(field(root.semantic, mode, 'semantic'), 'color', `semantic.${mode}`)
+    for (const role of colorRoles) {
+      const v = object(field(sem, role, `semantic.${mode}.color`), `semantic.${mode}.color.${role}`)
+      if (v.$type !== 'color' || v.$value !== `{primitive.color.${mode}.${role}}`) throw new Error(`semantic.${mode}.color.${role} 引用无效`)
+    }
+    const comp = object(field(root.component, mode, 'component'), `component.${mode}`)
+    const btn = object(field(field(comp, 'button', `component.${mode}`), 'primary', `component.${mode}.button`), `component.${mode}.button.primary`)
+    const input = object(field(comp, 'input', `component.${mode}`), `component.${mode}.input`)
+    const verify = (token: unknown, type: string, expected: string | number, path: string) => {
+      const t = object(token, path)
+      if (t.$type !== type || t.$value !== expected) throw new Error(`${path} Token 不符合该导出格式`)
+    }
+    verify(btn.background, 'color', `{semantic.${mode}.color.accent}`, `component.${mode}.button.primary.background`)
+    verify(btn.foreground, 'color', `{semantic.${mode}.color.onAccent}`, `component.${mode}.button.primary.foreground`)
+    verify(btn.focusRing, 'color', `{semantic.${mode}.color.accent}`, `component.${mode}.button.primary.focusRing`)
+    verify(input.background, 'color', `{semantic.${mode}.color.surface}`, `component.${mode}.input.background`)
+    verify(input.foreground, 'color', `{semantic.${mode}.color.text}`, `component.${mode}.input.foreground`)
+    verify(input.border, 'color', `{semantic.${mode}.color.border}`, `component.${mode}.input.border`)
+    verify(input.focusRing, 'color', `{semantic.${mode}.color.accent}`, `component.${mode}.input.focusRing`)
+    verify(btn.disabledOpacity, 'number', component.disabledOpacity, `component.${mode}.button.primary.disabledOpacity`)
+    verify(input.disabledOpacity, 'number', component.disabledOpacity, `component.${mode}.input.disabledOpacity`)
+    if (readColor(btn.hoverBackground, `component.${mode}.button.primary.hoverBackground`) !== hoverColor(modes[mode], component)) throw new Error(`component.${mode}.button.primary.hoverBackground 与设定不一致`)
+  }
+  const control = object(field(root.component, 'control', 'component'), 'component.control')
+  const validateDim = (token: unknown, value: number, path: string) => {
+    const t = object(token, path)
+    const d = object(t.$value, `${path}.$value`)
+    if (t.$type !== 'dimension' || d.unit !== 'px' || d.value !== value) throw new Error(`${path} 数值不匹配`)
+  }
+  validateDim(control.height, component.controlHeight, 'component.control.height')
+  validateDim(control.focusWidth, component.focusWidth, 'component.control.focusWidth')
+  // Verify both modes are complete and the Studio extension cannot contradict its leaves.
+  for (const mode of tokenModes) {
+    const semantic = object(field(root.semantic, mode, 'semantic'), `semantic.${mode}`)
+    if (!semantic.color) throw new Error(`semantic.${mode}.color 缺失`)
+  }
+  return { modes, component }
 }

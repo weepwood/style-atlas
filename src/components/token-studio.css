@@ -132,3 +132,26 @@
 @media(max-width:800px){.token-studio{margin-top:78px}.ts-workbench{grid-template-columns:1fr}.ts-editor{border-right:0;border-bottom:1px solid #e7e7e2}.ts-preview-panel{padding:20px}.ts-stage-wrap{min-height:465px}.ts-toolbar{gap:10px}.ts-preset-count{display:none}.ts-link-button:last-child{margin-left:0}.ts-export-panel{grid-template-columns:1fr;gap:16px}.ts-export-info p{max-width:none}}
 @media(max-width:530px){.ts-preset-picker{width:100%;justify-content:space-between}.ts-preset-picker select{max-width:190px}.ts-stage{height:470px}.ts-app-shell{grid-template-columns:89px 1fr}.ts-app-sidebar{padding:14px 4px 7px}.ts-app-logo{font-size:9px;gap:3px}.ts-app-logo small{display:none}.ts-side-caption{font-size:7px}.ts-app-sidebar button,.ts-side-link{font-size:9px;padding:8px 4px}.ts-side-profile{font-size:8px}.ts-side-profile>span:last-child{display:none}.ts-avatar{width:20px;height:20px}.ts-hero-title{align-items:start;flex-direction:column}.ts-hero-title h4{font-size:20px}.ts-hero-title p{font-size:9px}.ts-stat-grid{gap:5px}.ts-stat-grid>div{padding:9px 6px}.ts-stat-grid strong{font-size:20px}.ts-stat-grid small{font-size:8px}.ts-stat-grid div>span{font-size:8px}.ts-task-card{padding:12px}.ts-task-item{padding:9px 0}.ts-preview-footer span:last-child{display:none}.ts-color-control{padding:7px 5px;gap:5px}.ts-color-control input[type=color]{width:30px;min-width:30px;height:30px}.ts-export-code pre{font-size:9px;padding:12px}}
 @media(prefers-reduced-motion:reduce){.token-studio *, .token-studio *::before, .token-studio *::after{transition-duration:0.01ms!important;animation-duration:0.01ms!important}}
+
+/* Token Studio v2: independently editable light/dark modes and inspectable component states */
+.ts-mode-bar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin:15px 0 22px;padding:12px 17px;border:1px solid #e6e8e3;border-radius:12px;background:#f7f8f5}
+.ts-mode-bar>div:first-child{display:flex;flex-direction:column;gap:4px}.ts-mode-bar strong{font-size:12px;color:#303630}.ts-mode-bar span{font-size:11px;color:#747b73;line-height:1.5}
+.ts-mode-switch{display:flex;gap:3px;background:#e8ebe5;border-radius:9px;padding:4px;flex-shrink:0}
+.ts-mode-switch button{font:inherit;font-size:11px;padding:8px 13px;border:0;border-radius:6px;background:transparent;color:#66716b;cursor:pointer}.ts-mode-switch button.active{background:#fff;color:#242b27;box-shadow:0 2px 7px #202a2212;font-weight:750}
+.ts-mode-switch button:focus-visible,.ts-file-upload:focus-within{outline:2px solid #6257ad;outline-offset:2px}
+.ts-stage .ts-primary-btn,.ts-stage .ts-secondary-btn{min-height:var(--ts-control-height);transition:background var(--ts-time),border-color var(--ts-time)}
+.ts-stage .ts-primary-btn:hover:not(:disabled){background:var(--ts-hover-bg);filter:none;transform:none}
+.ts-stage .ts-primary-btn:focus-visible,.ts-stage .ts-secondary-btn:focus-visible,.ts-components-page input:focus-visible{outline:var(--ts-focus-width) solid var(--ts-accent);outline-offset:2px}
+.ts-stage button:disabled,.ts-stage input:disabled{opacity:var(--ts-disabled-opacity);cursor:not-allowed}
+.ts-components-page .ts-component-demo{flex-wrap:wrap;row-gap:10px}
+.ts-components-page input{min-height:var(--ts-control-height)}
+.ts-components-page input:hover{border-color:var(--ts-accent)}
+.ts-import-panel{display:grid;grid-template-columns: minmax(240px,.8fr) minmax(0,1.2fr);gap:30px;margin-top:23px;border:1px solid #e0e2df;border-radius:16px;padding:26px;background:#fff}
+.ts-import-intro>span{font-size:10px;letter-spacing:.16em;font-weight:800;color:#6e7482}.ts-import-intro h3{font-size:22px;letter-spacing:-.035em;color:#2c3031;margin:10px 0}.ts-import-intro p{font-size:12px;line-height:1.85;color:#777f7d;max-width:35ch}
+.ts-import-controls{display:grid;gap:11px;min-width:0}.ts-import-controls>label:not(.ts-file-upload){font-size:12px;color:#555d58;font-weight:600}
+.ts-file-upload{display:inline-flex;width:max-content;align-items:center;justify-content:center;border:1px solid #d5d9d2;border-radius:8px;padding:8px 13px;cursor:pointer;color:#323b36;background:#f8f9f6;font-size:12px;font-weight:700}.ts-file-upload{position:relative}.ts-file-upload input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip-path:inset(50%)}
+.ts-import-controls textarea{min-height:98px;width:100%;box-sizing:border-box;padding:12px;border:1px solid #dce0d9;border-radius:8px;color:#303834;background:#f9faf8;font:11px/1.7 Consolas,monospace;resize:vertical}
+.ts-import-controls textarea:focus-visible{outline:2px solid #655ba9;outline-offset:1px}
+.ts-import-controls>button{justify-self:start;padding:10px 16px;border:0;border-radius:8px;background:#302c46;color:#fff;font-weight:650;font-size:12px;cursor:pointer}.ts-import-controls>button:disabled{opacity:.5;cursor:not-allowed}.ts-import-controls>button:focus-visible{outline:2px solid #6859b9;outline-offset:2px}
+.ts-import-error{font-size:12px;color:#a32d3b;margin:0;overflow-wrap:anywhere}
+@media(max-width:800px){.ts-import-panel{grid-template-columns:1fr;gap:12px}}@media(max-width:530px){.ts-mode-bar{flex-wrap:wrap}.ts-mode-switch{width:100%}.ts-mode-switch button{flex:1}}

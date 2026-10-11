@@ -2,8 +2,9 @@ import { useMemo, useState, type CSSProperties } from 'react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import type { VisualStyle } from '../types/style'
 import {
-  colorRoles, contrast, exportCss, exportDtcg, exportTailwind, exportWpf,
-  getDefaultSettings, roleLabels, type ColorRole, type Density, type FontChoice, type TokenSettings,
+  colorRoles, contrast, exportCss, exportDtcg, exportTailwind, exportWpf, importDtcg,
+  getDefaultProfile, hoverColor, isTokenProfile, profileFromLegacy, roleLabels, type ColorRole, type Density, type FontChoice,
+  type TokenMode, type TokenProfile, type TokenSettings,
 } from '../data/tokenSystem'
 import './token-studio.css'
 
@@ -18,7 +19,11 @@ const formatName: Record<Format, string> = { css: 'CSS Variables', dtcg: 'DTCG J
 
 export function TokenStudio({ styles, selectedThemeId }: { styles: VisualStyle[]; selectedThemeId: string | null }) {
   const [chosenId, setChosenId] = useLocalStorage('style-atlas-token-style', 'notion-workspace')
-  const [overrides, setOverrides] = useLocalStorage<Record<string, TokenSettings>>('style-atlas-token-overrides-v1', {})
+  const [overrides, setOverrides] = useLocalStorage<Record<string, TokenProfile | TokenSettings>>('style-atlas-token-overrides-v1', {})
+  const [tokenMode, setTokenMode] = useState<TokenMode>('light')
+  const [importDraft, setImportDraft] = useState('')
+  const [importError, setImportError] = useState('')
+
   const [format, setFormat] = useState<Format>('css')
   const [previewTab, setPreviewTab] = useState<'overview' | 'components'>('overview')
   const [createdTask, setCreatedTask] = useState(false)
@@ -26,17 +31,43 @@ export function TokenStudio({ styles, selectedThemeId }: { styles: VisualStyle[]
   const [message, setMessage] = useState('')
 
   const style = styles.find(v => v.id === chosenId) ?? styles[0]
-  const settings = overrides[style.id] ?? getDefaultSettings(style)
+  const saved = overrides[style.id]
+  const profile = saved ? isTokenProfile(saved) ? saved : profileFromLegacy(saved, style) : getDefaultProfile(style)
+  const settings = profile.modes[tokenMode]
   const selectedAppliedStyle = selectedThemeId ? styles.find(v => v.id === selectedThemeId) : null
-  const css = useMemo(() => exportCss(settings), [settings])
-  const fileText = useMemo(() => ({ css, dtcg: exportDtcg(settings, style.name), tailwind: exportTailwind(settings), wpf: exportWpf(settings) }), [css, settings, style.name])
+  const css = useMemo(() => exportCss(profile), [settings])
+  const fileText = useMemo(() => ({ css, dtcg: exportDtcg(profile, style.name), tailwind: exportTailwind(profile), wpf: exportWpf(profile) }), [css, profile, style.name])
   const checks = [
     { name: '正文 / 页面', score: contrast(settings.colors.text, settings.colors.canvas), threshold: 4.5 },
     { name: '正文 / 卡片', score: contrast(settings.colors.text, settings.colors.surface), threshold: 4.5 },
     { name: '按钮 / 文字', score: contrast(settings.colors.onAccent, settings.colors.accent), threshold: 4.5 },
+    { name: '次要文字 / 卡片', score: contrast(settings.colors.muted, settings.colors.surface), threshold: 4.5 },
+    { name: '悬停按钮 / 文字', score: contrast(settings.colors.onAccent, hoverColor(settings, profile.component)), threshold: 4.5 },
+    { name: '聚焦轮廓 / 页面', score: contrast(settings.colors.accent, settings.colors.canvas), threshold: 3 },
   ]
   const edit = (patch: Partial<TokenSettings>) => {
-    setOverrides(current => ({ ...current, [style.id]: { ...settings, ...patch } }))
+    setOverrides(current => ({ ...current, [style.id]: { ...profile, modes: { ...profile.modes, [tokenMode]: { ...settings, ...patch } } } }))
+  }
+  const editComponent = (patch: Partial<TokenProfile['component']>) => {
+    setOverrides(current => ({ ...current, [style.id]: { ...profile, component: { ...profile.component, ...patch } } }))
+  }
+  const tryImport = (text: string) => {
+    try {
+      const parsed = importDtcg(text)
+      setOverrides(current => ({ ...current, [style.id]: parsed }))
+      setImportError('')
+      setMessage(`已导入双模式设计 Token，保存到「${style.name}」的本地配置` )
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : '无法解析文件'
+      setImportError(reason)
+      setMessage('导入失败，原有配置未修改')
+    }
+  }
+  const importFile = async (file: File | undefined) => {
+    if (!file) return
+    if (file.size > 512_000) { setImportError('文件太大（最大 500 KiB）'); return }
+    try { const raw = await file.text(); setImportDraft(raw); tryImport(raw) }
+    catch { setImportError('读取文件失败') }
   }
   const updateColor = (role: ColorRole, value: string) => edit({ colors: { ...settings.colors, [role]: value } })
   const reset = () => {
@@ -67,6 +98,10 @@ export function TokenStudio({ styles, selectedThemeId }: { styles: VisualStyle[]
     '--ts-gap': settings.density === 'compact' ? '10px' : settings.density === 'relaxed' ? '21px' : '15px',
     '--ts-font': settings.font === 'serif' ? 'Georgia, "Songti SC", serif' : settings.font === 'mono' ? 'Consolas, monospace' : 'Inter, "Microsoft YaHei", system-ui, sans-serif',
     '--ts-time': settings.motion ? '180ms' : '0ms',
+    '--ts-hover-bg': hoverColor(settings, profile.component),
+    '--ts-focus-width': `${profile.component.focusWidth}px`,
+    '--ts-disabled-opacity': profile.component.disabledOpacity,
+    '--ts-control-height': `${profile.component.controlHeight}px`,
   } as CSSProperties
   const taskNames = [...(createdTask ? ['Review tokens'] : []), 'Structure', 'Design review', 'Interaction', 'Accessibility']
   const toggleTask = (task: string) => setCheckedTasks(v => v.includes(task) ? v.filter(t => t !== task) : [...v, task])
@@ -97,10 +132,18 @@ export function TokenStudio({ styles, selectedThemeId }: { styles: VisualStyle[]
         <button className="ts-link-button" type="button" onClick={reset}>↺ 重置当前风格</button>
       </div>
 
+      <div className="ts-mode-bar" aria-label="Token 主题模式">
+        <div><strong>双模式设计</strong><span>Light / Dark 分别编辑和保存，导出时同时包含两套颜色。</span></div>
+        <div role="group" aria-label="选择编辑模式" className="ts-mode-switch">
+          <button type="button" className={tokenMode === 'light' ? 'active' : ''} aria-pressed={tokenMode === 'light'} onClick={() => setTokenMode('light')}>☀ 浅色</button>
+          <button type="button" className={tokenMode === 'dark' ? 'active' : ''} aria-pressed={tokenMode === 'dark'} onClick={() => setTokenMode('dark')}>☾ 深色</button>
+        </div>
+      </div>
+
       <div className="ts-workbench">
         <div className="ts-editor">
           <div className="ts-pane-heading"><div><span>01 / FOUNDATION</span><h3>设计变量</h3></div><small>修改自动保存于浏览器</small></div>
-          <div className="ts-control-title"><strong>语义色彩</strong><span>7 TOKENS</span></div>
+          <div className="ts-control-title"><strong>语义色彩 · {tokenMode === 'light' ? 'Light' : 'Dark'}</strong><span>7 TOKENS</span></div>
           <div className="ts-color-grid">
             {colorRoles.map(role => <label className="ts-color-control" key={role}>
               <input type="color" aria-label={`设置${roleLabels[role]}`} value={settings.colors[role]} onChange={e => updateColor(role, e.target.value.toUpperCase())} />
@@ -112,9 +155,14 @@ export function TokenStudio({ styles, selectedThemeId }: { styles: VisualStyle[]
           <label className="ts-field-row"><span>布局密度</span><select value={settings.density} onChange={e => edit({ density: e.target.value as Density })}><option value="compact">紧凑 · Compact</option><option value="balanced">平衡 · Balanced</option><option value="relaxed">宽松 · Relaxed</option></select></label>
           <label className="ts-field-row"><span>字体气质</span><select value={settings.font} onChange={e => edit({ font: e.target.value as FontChoice })}><option value="sans">无衬线 · Sans</option><option value="serif">衬线 · Editorial</option><option value="mono">等宽 · Monospace</option></select></label>
           <label className="ts-switch-line"><span>界面过渡效果<small>遵守系统减少动画设置</small></span><input type="checkbox" checked={settings.motion} onChange={e => edit({ motion: e.target.checked })} /></label>
+          <div className="ts-control-title ts-divider-title"><strong>组件交互状态</strong><span>HOVER / FOCUS / DISABLED</span></div>
+          <label className="ts-field-row"><span>悬停色变化 <code>{Math.round(profile.component.hoverMix * 100)}%</code></span><input type="range" min="0" max="0.4" step="0.02" value={profile.component.hoverMix} onChange={e => editComponent({ hoverMix: Number(e.target.value) })} /></label>
+          <label className="ts-field-row"><span>键盘聚焦描边 <code>{profile.component.focusWidth}px</code></span><input type="range" min="1" max="6" step="1" value={profile.component.focusWidth} onChange={e => editComponent({ focusWidth: Number(e.target.value) })} /></label>
+          <label className="ts-field-row"><span>禁用透明度 <code>{Math.round(profile.component.disabledOpacity * 100)}%</code></span><input type="range" min="0.2" max="0.8" step="0.05" value={profile.component.disabledOpacity} onChange={e => editComponent({ disabledOpacity: Number(e.target.value) })} /></label>
+          <label className="ts-field-row"><span>控件高度 <code>{profile.component.controlHeight}px</code></span><input type="range" min="28" max="60" step="2" value={profile.component.controlHeight} onChange={e => editComponent({ controlHeight: Number(e.target.value) })} /></label>
           <div className="ts-contrast-box"><div className="ts-control-title"><strong>文字对比度检查</strong><span>WCAG AA / 4.5:1</span></div>
             {checks.map(v => <div key={v.name} className="ts-contrast-row"><span>{v.name}</span><code>{v.score.toFixed(2)}:1</code><b className={v.score >= v.threshold ? 'ts-pass' : 'ts-fail'}>{v.score >= v.threshold ? '通过' : '偏低'}</b></div>)}
-            <small>仅检查以上三组文字组合；完整无障碍验收仍需覆盖所有状态和图形控件。</small>
+            <small>正文按 4.5:1，焦点轮廓按 3:1 检查；禁用态与复杂背景需另行验收。</small>
           </div>
         </div>
 
@@ -140,12 +188,12 @@ export function TokenStudio({ styles, selectedThemeId }: { styles: VisualStyle[]
                     <div className="ts-task-card"><div className="ts-task-title"><div><strong>本周待办</strong><small>{checkedTasks.length} / {taskNames.length} 已完成</small></div><span>•••</span></div>
                       {taskNames.map((task, i) => <label key={task} className="ts-task-item"><input type="checkbox" checked={checkedTasks.includes(task)} onChange={() => toggleTask(task)} /><span className={checkedTasks.includes(task) ? 'done' : ''}>{task}</span><small>{i < 2 ? 'Today' : 'Upcoming'}</small></label>)}
                     </div>
-                  </> : <div className="ts-components-page"><h4>组件状态</h4><p>真实按钮、输入框、徽标与反馈状态同步继承 Token。</p><div className="ts-component-demo"><button type="button" className="ts-primary-btn" onClick={() => setMessage('预览按钮已触发')}>Primary action</button><button type="button" className="ts-secondary-btn" onClick={() => setMessage('次级按钮已触发')}>Secondary</button><span className="ts-demo-badge">● Active</span></div><input type="text" placeholder="Try typing a component label..." aria-label="示例输入框" /><div className="ts-demo-note">✦ 设计组件的语义色、圆角、密度与字体都与左侧设置同步。</div></div>}
+                  </> : <div className="ts-components-page"><h4>组件状态</h4><p>真实按钮、输入框、徽标与反馈状态同步继承 Token。</p><div className="ts-component-demo"><button type="button" className="ts-primary-btn" onClick={() => setMessage('预览按钮已触发')}>Primary action</button><button type="button" className="ts-secondary-btn" onClick={() => setMessage('次级按钮已触发')}>Secondary</button><button type="button" className="ts-primary-btn" disabled>Disabled</button><span className="ts-demo-badge">● Active</span></div><input type="text" placeholder="Try typing a component label..." aria-label="示例输入框" /><div className="ts-demo-note">✦ 通过鼠标悬停、Tab 键聚焦以及禁用按钮，检查默认 / hover / focus-visible / disabled 状态。</div></div>}
                 </main>
               </div>
             </div>
           </div>
-          <div className="ts-preview-footer"><span><i /> CSS Variables 绑定预览 · 不影响网站当前主题</span><span>{style.en} / {settings.density}</span></div>
+          <div className="ts-preview-footer"><span><i /> CSS Variables 绑定预览 · 不影响网站当前主题</span><span>{style.en} / {tokenMode} / {settings.density}</span></div>
         </div>
       </div>
 
@@ -155,6 +203,16 @@ export function TokenStudio({ styles, selectedThemeId }: { styles: VisualStyle[]
           <div className="ts-format-tabs" role="tablist" aria-label="Token 导出格式">{formats.map(v => <button key={v.id} role="tab" type="button" aria-selected={format === v.id} onClick={() => setFormat(v.id)}>{v.name}</button>)}</div>
           <pre aria-label={`${formatName[format]} 代码预览`}><code>{fileText[format].split('\n').slice(0, 18).join('\n')}{fileText[format].split('\n').length > 18 ? '\n…' : ''}</code></pre>
           <div className="ts-export-actions"><span>{formatName[format]} · {fileText[format].split('\n').length} 行</span><button type="button" onClick={copy}>复制完整代码 ↗</button><button type="button" onClick={download}>↓ 下载文件</button></div>
+        </div>
+      </div>
+      <div className="ts-import-panel">
+        <div className="ts-import-intro"><span>04 / IMPORT & VALIDATION</span><h3>从文件恢复整套设计决策</h3><p>选择本工作台导出的 DTCG v2 JSON，或粘贴其文本。仅在完整校验成功后替换当前风格配置；其他风格不受影响。</p></div>
+        <div className="ts-import-controls">
+          <label className="ts-file-upload">选择 JSON 文件 <input type="file" accept=".json,application/json" onChange={e => { void importFile(e.target.files?.[0]); e.target.value = '' }} /></label>
+          <label htmlFor="ts-json-import">或者粘贴 JSON</label>
+          <textarea id="ts-json-import" rows={4} spellCheck={false} value={importDraft} onChange={e => setImportDraft(e.target.value)} placeholder={'{\n  "$schema": "...",\n  ...\n}'} />
+          <button type="button" onClick={() => tryImport(importDraft)} disabled={!importDraft.trim()}>校验并导入当前预设</button>
+          {importError && <p className="ts-import-error" role="alert">导入失败：{importError}</p>}
         </div>
       </div>
       <p className="ts-status" role="status" aria-live="polite">{message || '所有定制保存在此浏览器中；导出的 Token 文件可提交到 Git 仓库统一管理。'}</p>

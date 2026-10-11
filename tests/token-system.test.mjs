@@ -19,7 +19,13 @@ for (const style of variants) {
     p.component.hoverMix = 0.22
     p.component.disabledOpacity = 0.35
     p.component.controlHeight = 42
-    const actual = importDtcg(exportDtcg(p, style.name))
+    const dtcg = exportDtcg(p, style.name)
+    const raw = JSON.parse(dtcg)
+    assert.equal(raw.primitive.spacing.light.step1.$value.value, 5)
+    assert.equal(raw.primitive.spacing.dark.step1.$value.value, 4)
+    assert.equal(raw.primitive.radius.dark.md.$value.value, 22)
+    assert.equal(raw.semantic.dark.radius.control.$value, '{primitive.radius.dark.md}')
+    const actual = importDtcg(dtcg)
     assert.deepEqual(actual, p)
     const css = exportCss(actual)
     assert.match(css, /\[data-ui-mode="dark"\]/)

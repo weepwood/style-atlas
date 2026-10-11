@@ -23,7 +23,9 @@ function App() {
   const [favorites, setFavorites] = useLocalStorage<string[]>('style-atlas-favorites', [])
   const [selectedThemeId, setSelectedThemeId] = useLocalStorage<string | null>('style-atlas-selected-theme', null)
   const [theme, setTheme] = useState<'light' | 'dark'>(getInitialTheme)
-  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const [motionOverride, setMotionOverride] = useLocalStorage<boolean | null>('style-atlas-motion-override', null)
+  const [systemReducedMotion, setSystemReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const reducedMotion = motionOverride ?? systemReducedMotion
   const [toast, setToast] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
   const toastTimerRef = useRef<number | null>(null)
@@ -63,6 +65,13 @@ function App() {
   useEffect(() => {
     document.documentElement.dataset.reducedMotion = String(reducedMotion)
   }, [reducedMotion])
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setSystemReducedMotion(media.matches)
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
@@ -135,7 +144,7 @@ function App() {
         dark={theme === 'dark'}
         reducedMotion={reducedMotion}
         onToggleTheme={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}
-        onToggleMotion={() => setReducedMotion((current) => !current)}
+        onToggleMotion={() => setMotionOverride(current => !(current ?? systemReducedMotion))}
       />
 
       <aside className={`theme-status ${appliedStyle ? 'active' : ''}`} aria-live="polite">
@@ -194,7 +203,7 @@ function App() {
           )}
         </section>
 
-        <MotionLab reducedMotion={reducedMotion} onToggleMotion={() => setReducedMotion(current => !current)} />
+        <MotionLab reducedMotion={reducedMotion} motionCustomized={motionOverride !== null} onToggleMotion={() => setMotionOverride(current => !(current ?? systemReducedMotion))} onFollowSystem={() => setMotionOverride(null)} />
 
         <ClientAtlas />
 

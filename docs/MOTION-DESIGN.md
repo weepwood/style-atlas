@@ -42,7 +42,7 @@
 
 ## 4. 可访问性约束
 
-- 尊重 `prefers-reduced-motion: reduce`，默认遵从操作系统设置，并允许站内“减少动画”开关覆盖。
+- 尊重 `prefers-reduced-motion: reduce`，默认遵从操作系统设置，站内“减少动画”可覆盖并将选择保存到 localStorage，亦可恢复“跟随系统”模式。
 - 减少动画时，移除无意义的平移、缩放、悬浮与持续旋转；保留色彩、文本和静态选中态。
 - 不做连续闪屏、快速高对比色交替，尤其是赛博、Y2K、印刷半调主题。
 - 使用 `:focus-visible` 明确键盘焦点；`aria-pressed`、`aria-selected`、`role=status`、`aria-expanded` 传达状态；降低动画不应取消必要反馈。

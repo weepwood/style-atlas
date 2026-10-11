@@ -7,7 +7,7 @@ export function NewStylePreview({ styleId }: { styleId: string }) {
     </div>
     case 'notion-workspace': return <div className="mini-window nsp-notion">
       <aside><div className="nsp-notion-workspace">▣　Personal Space <b>⌄</b></div><small>✳　搜索</small><small>▤　首页</small><small>▥　收件箱</small><span>私有页面　＋</span><small className="is-active">▥　设计灵感</small><small>▤　视觉图鉴</small></aside>
-      <main><div className="nsp-notion-breadcrumb">Personal / 设计灵感 <span>···</span></div><div className="nsp-notion-body"><span className="nsp-notion-emoji">✳</span><h4>设计灵感</h4><p>收集、整理和发现优秀的界面语言。</p><div className="nsp-notion-rule"/><b>▸ 进行中的研究</b><p>☑　整理设计系统</p><p>☐　完成动画规范</p><span className="nsp-notion-tip">按 / 进入命令菜单</span></div></main>
+      <section><div className="nsp-notion-breadcrumb">Personal / 设计灵感 <span>···</span></div><div className="nsp-notion-body"><span className="nsp-notion-emoji">✳</span><h4>设计灵感</h4><p>收集、整理和发现优秀的界面语言。</p><div className="nsp-notion-rule"/><b>▸ 进行中的研究</b><p>☑　整理设计系统</p><p>☐　完成动画规范</p><span className="nsp-notion-tip">按 / 进入命令菜单</span></div></section>
     </div>
     case 'liquid': return <div className="mini-window nsp-liquid">
       <div className="nsp-liquid-ambient"/>

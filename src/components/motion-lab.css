@@ -19,3 +19,5 @@ html[data-reduced-motion=true] .motion-drawer,html[data-reduced-motion=true] .mo
 .motion-profile>p{font-size:12px;color:var(--muted);line-height:1.8}
 .motion-profile .motion-profile-note{border-left:3px solid var(--accent);padding:5px 12px;margin-top:10px}
 @media(max-width:560px){.motion-profile-grid{grid-template-columns:1fr}}
+
+.motion-settings{display:flex;flex-direction:column;align-items:flex-end;gap:9px;flex-shrink:0}.motion-system-button{border:0;background:transparent;color:var(--muted);font-size:11px;cursor:pointer}.motion-system-button:hover{color:var(--accent)}.motion-system-button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}@media(max-width:1100px){.motion-settings{align-items:flex-start}}

@@ -8,9 +8,9 @@ const motionRules = [
   { id: 'status', label: '状态提示', time: '160–220ms', use: '成功反馈、通知、保存', ease: 'ease-out' },
 ]
 
-type MotionLabProps = { reducedMotion: boolean; onToggleMotion: () => void }
+type MotionLabProps = { reducedMotion: boolean; motionCustomized: boolean; onToggleMotion: () => void; onFollowSystem: () => void }
 
-export function MotionLab({ reducedMotion, onToggleMotion }: MotionLabProps) {
+export function MotionLab({ reducedMotion, motionCustomized, onToggleMotion, onFollowSystem }: MotionLabProps) {
   const [pressed, setPressed] = useState(false)
   const [tab, setTab] = useState(0)
   const [open, setOpen] = useState(false)
@@ -21,9 +21,12 @@ export function MotionLab({ reducedMotion, onToggleMotion }: MotionLabProps) {
         <h2 id="motion-lab-title">动效不是装饰，<em>而是行为的解释。</em></h2>
         <p>动效要交代因果关系、视觉层级和操作结果。下方的四种模式可以实际点击体验；所有反馈保持短促，不阻塞下一次操作。</p>
       </div>
-      <button className="motion-setting" type="button" aria-pressed={reducedMotion} onClick={onToggleMotion}>
-        <span aria-hidden="true">{reducedMotion ? '◻' : '◉'}</span>{reducedMotion ? '已减少动画 · 点击启用' : '动画已启用 · 点击减少'}
-      </button>
+      <div className="motion-settings">
+        <button className="motion-setting" type="button" aria-pressed={reducedMotion} onClick={onToggleMotion}>
+          <span aria-hidden="true">{reducedMotion ? '◻' : '◉'}</span>{reducedMotion ? '已减少动画 · 点击启用' : '动画已启用 · 点击减少'}
+        </button>
+        {motionCustomized && <button className="motion-system-button" type="button" onClick={onFollowSystem}>↺ 跟随系统偏好</button>}
+      </div>
     </div>
     <div className="motion-rules">{motionRules.map(rule => <div key={rule.id}><small>{rule.label}</small><strong>{rule.time}</strong><span>{rule.use}</span><code>{rule.ease}</code></div>)}</div>
     <div className="motion-demos">

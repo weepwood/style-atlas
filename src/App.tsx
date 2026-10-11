@@ -9,6 +9,7 @@ import { StyleCard } from './components/StyleCard'
 import { StyleDialog } from './components/StyleDialog'
 import { ClientAtlas } from './components/ClientAtlas'
 import { MotionLab } from './components/MotionLab'
+import { TokenStudio } from './components/TokenStudio'
 
 function getInitialTheme() {
   const saved = window.localStorage.getItem('style-atlas-theme')
@@ -212,6 +213,8 @@ function App() {
             </div>
           )}
         </section>
+
+        <TokenStudio styles={styles} selectedThemeId={selectedThemeId} />
 
         <MotionLab reducedMotion={reducedMotion} motionCustomized={motionOverride !== null} onToggleMotion={() => setMotionOverride(current => !(current ?? systemReducedMotion))} onFollowSystem={() => setMotionOverride(null)} />
 

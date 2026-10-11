@@ -1,4 +1,5 @@
 import { ExtraStylePreview } from './ExtraStylePreview'
+import { NewStylePreview } from './NewStylePreview'
 
 interface StylePreviewProps {
   styleId: string
@@ -125,6 +126,6 @@ export function StylePreview({ styleId }: StylePreviewProps) {
         </div>
       )
     default:
-      return <ExtraStylePreview styleId={styleId} />
+      return ['fluent-mica','notion-workspace','liquid','halftone','command','oled','soft-gradient','papercut','ink-wash','isometric'].includes(styleId) ? <NewStylePreview styleId={styleId} /> : <ExtraStylePreview styleId={styleId} />
   }
 }

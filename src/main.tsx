@@ -9,6 +9,8 @@ import './styles/previews-b.css'
 import './styles/previews-c.css'
 import './styles/dialog-responsive.css'
 import './styles/themes.css'
+import './styles/new-style-previews.css'
+import './styles/theme-refinements.css'
 import './styles/interaction-fixes.css'
 
 createRoot(document.getElementById('root')!).render(

@@ -15,6 +15,7 @@ export function Hero({ styleCount, onRandom }: HeroProps) {
         <div className="hero-actions">
           <a className="primary-button" href="#gallery">开始浏览 <span aria-hidden="true">↘</span></a>
           <button className="secondary-button" type="button" onClick={onRandom}>随机探索</button>
+          <a className="secondary-button" href="#motion-lab">动效实验室 ↗</a>
         </div>
         <dl className="hero-stats" aria-label="图鉴统计">
           <div><dt>{styleCount}</dt><dd>视觉风格</dd></div>

@@ -1,6 +1,6 @@
 # Style Atlas
 
-基于 React、TypeScript 与 Vite 构建的前端视觉风格图鉴。项目通过实时组件展示 12 种网页视觉语言，并提供筛选、搜索、收藏、主题切换、减少动画、配色复制与 CSS Token 导出。
+基于 React、TypeScript 与 Vite 构建的前端视觉风格图鉴，当前收录 30 种视觉语言。支持实时预览、点击应用全站主题、筛选、搜索、收藏、减少动画、配色复制、动效实验室与 CSS Token 导出。
 
 主题交互：**悬停或键盘聚焦风格卡片只触发局部高亮，点击卡片才会切换整个网站主题**。应用后会记住当前选择，可通过左下角「恢复默认」清除。
 
@@ -8,6 +8,14 @@
 
 GitHub Pages：<https://weepwood.github.io/style-atlas/>
 
+
+## 主题与动效设计扩充（2026-10-11）
+
+- **20 → 30 种独立视觉风格**：新增 Fluent 云母、文档工作台、液态光学玻璃、半调印刷、指挥仪表盘、OLED 深夜、柔雾渐层、纸雕层叠、水墨留白、等距科技空间。
+- **原主题细化**：为原有 20 种主题补充差异化的字体权重、间距、边框、材质层级和控件交互样式。
+- **动效实验室**：可操作地体验按钮反馈、导航切换、抽屉展开与通知反馈；统一节奏并支持系统与手动减少动画。
+- **主题操作不变**：鼠标悬停只高亮卡片；点击才应用到全站并保持选择。
+- 样例及资料：`src/data/newStyles.ts`、`src/components/NewStylePreview.tsx`、`src/styles/new-style-previews.css`、`src/styles/theme-refinements.css`、`docs/MOTION-DESIGN.md`。
 
 ## 客户端 UI 风格图鉴
 

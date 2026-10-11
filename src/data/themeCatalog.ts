@@ -1,7 +1,8 @@
 import { styles as baseStyles } from './styles'
 import { extraStyles } from './extraStyles'
+import { newStyles } from './newStyles'
 
-export const styles = [...baseStyles, ...extraStyles]
+export const styles = [...baseStyles, ...extraStyles, ...newStyles]
 
 export const categories = [
   '全部',

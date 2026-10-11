@@ -37,7 +37,7 @@ CSS 提供 `--ui-canvas`, `--ui-surface`, `--ui-text`, `--ui-muted`, `--ui-borde
 ## DTCG v2 交换约定
 
 - `$schema` 指向 2025.10 的格式说明；颜色叶子使用 `srgb` 的 `hex + components` 格式。
-- `primitive.color.light|dark` 是实际颜色，`semantic.light|dark.color.*` 用 `{...}` 别名引用。
+- `primitive.color.light|dark`、`primitive.spacing.light|dark`、`primitive.radius.light|dark`、`primitive.typography.light|dark`、`primitive.motion.light|dark` 分别记录两套模式的实际值，`semantic.light|dark.color.*` 用 `{...}` 别名引用。
 - `component.light|dark.button.primary`, `input` 含基本交互 Token；工作台专属的共享配置在 `$extensions.com.style-atlas` 中。
 - 为确保回写行为确定，导入仅支持工作台自己生成的版本 2 结构，并检查颜色一致性、别名、组件状态和参数范围。数据不会被上传到服务器；全部在浏览器内解析。
 - 已有的 `style-atlas-token-overrides-v1` 本地配置仍会保留并在编辑时按原预设的明暗模式转为 v2 结构。

@@ -9,3 +9,13 @@
 html[data-reduced-motion=true] .motion-drawer,html[data-reduced-motion=true] .motion-tab-copy,html[data-reduced-motion=true] .motion-notice{animation:none;transition:none}
 @media(prefers-reduced-motion:reduce){html:not([data-reduced-motion=false]) .motion-drawer,html:not([data-reduced-motion=false]) .motion-tab-copy,html:not([data-reduced-motion=false]) .motion-notice{animation:none;transition:none}}
 @media(max-width:1100px){.motion-rules,.motion-demos{grid-template-columns:repeat(2,minmax(0,1fr))}.motion-heading{align-items:start;flex-direction:column}}@media(max-width:610px){.motion-lab{width:calc(100% - 30px)}.motion-rules{gap:7px}.motion-rules>div{padding:12px}.motion-rules strong{font-size:18px}.motion-demos{grid-template-columns:1fr}.motion-demo>p{min-height:0}.motion-guideline{flex-direction:column;gap:4px}}
+
+/* Shared style detail: motion decisions alongside tokens and usage notes. */
+.motion-profile{margin-top:32px;padding-top:20px;border-top:1px solid var(--line)}
+.motion-profile-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px}
+.motion-profile-grid>div{display:grid;gap:8px;padding:14px;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;min-width:0}
+.motion-profile-grid small{font-size:10px;color:var(--muted)}
+.motion-profile-grid strong{font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.motion-profile>p{font-size:12px;color:var(--muted);line-height:1.8}
+.motion-profile .motion-profile-note{border-left:3px solid var(--accent);padding:5px 12px;margin-top:10px}
+@media(max-width:560px){.motion-profile-grid{grid-template-columns:1fr}}

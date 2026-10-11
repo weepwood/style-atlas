@@ -36,6 +36,16 @@ GitHub Pages：<https://weepwood.github.io/style-atlas/>
 
 未来可扩展：真实产品截图（仅限获得授权的素材）、更多系统级交互案例、可视化 Token 面板、动画曲线播放器、移动/桌面断点沙盒、Figma 文件可用性审核与自动化回归测试。
 
+## Dribbble × Figma 视觉与结构实验室（2026-10-11）
+
+- 独立页面：<https://weepwood.github.io/style-atlas/frame-lab/>
+- 12 种常见客户端视觉语言，可筛选、搜索、收藏。
+- 统一 Dashboard 风格工作台，支持主题、暗色预览、密度、圆角与 CSS Token 复制。
+- Figma 结构解剖台：图层选取、Auto Layout 的 Gap / Padding 调节、Frame / Component / Instance 概念。
+- 组件交互实验：按钮、Tabs、开关、输入校验、弹窗和动效时长。
+- 源码为 `public/frame-lab/index.html`，独立原生 HTML/CSS/JavaScript；Vite 构建时原样复制到 `dist/frame-lab/index.html`。
+- Dribbble 风格属于教学归纳，非实时热榜；界面是原创示例，附相关作品与 Figma 官方学习链接。
+
 ## 技术栈
 
 - React 19

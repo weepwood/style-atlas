@@ -164,7 +164,7 @@ function App() {
       <main id="top">
         <Hero styleCount={styles.length} onRandom={openRandomStyle} />
         <section aria-label="视觉与结构实验室" style={{ maxWidth: 1280, margin: '16px auto 34px', padding: '0 24px' }}>
-          <a href="${import.meta.env.BASE_URL}frame-lab/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, padding: '22px 26px', borderRadius: 18, background: 'linear-gradient(115deg,#242238,#473a78)', color: '#fff', textDecoration: 'none', boxShadow: '0 10px 28px rgba(21,20,54,.15)' }}>
+          <a href={`${import.meta.env.BASE_URL}frame-lab/`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, padding: '22px 26px', borderRadius: 18, background: 'linear-gradient(115deg,#242238,#473a78)', color: '#fff', textDecoration: 'none', boxShadow: '0 10px 28px rgba(21,20,54,.15)' }}>
             <span style={{ display: 'grid', gap: 7 }}>
               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', color: '#c6b9ff' }}>NEW · FRAME / LAB</span>
               <strong style={{ fontSize: 'clamp(18px,2.2vw,26px)', lineHeight: 1.3 }}>Dribbble 视觉 × Figma 设计结构</strong>

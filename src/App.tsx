@@ -21,7 +21,6 @@ function App() {
   const [activeStyle, setActiveStyle] = useState<VisualStyle | null>(null)
   const [favorites, setFavorites] = useLocalStorage<string[]>('style-atlas-favorites', [])
   const [selectedThemeId, setSelectedThemeId] = useLocalStorage<string | null>('style-atlas-selected-theme', null)
-  const [previewThemeId, setPreviewThemeId] = useState<string | null>(null)
   const [theme, setTheme] = useState<'light' | 'dark'>(getInitialTheme)
   const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [toast, setToast] = useState('')
@@ -29,10 +28,9 @@ function App() {
   const toastTimerRef = useRef<number | null>(null)
 
   const favoriteSet = useMemo(() => new Set(favorites), [favorites])
-  const appliedThemeId = previewThemeId ?? selectedThemeId
   const appliedStyle = useMemo(
-    () => styles.find((style) => style.id === appliedThemeId) ?? null,
-    [appliedThemeId],
+    () => styles.find((style) => style.id === selectedThemeId) ?? null,
+    [selectedThemeId],
   )
 
   const visibleStyles = useMemo(() => {
@@ -54,12 +52,12 @@ function App() {
   }, [theme])
 
   useEffect(() => {
-    if (appliedThemeId) {
-      document.documentElement.dataset.atlasTheme = appliedThemeId
+    if (selectedThemeId) {
+      document.documentElement.dataset.atlasTheme = selectedThemeId
     } else {
       delete document.documentElement.dataset.atlasTheme
     }
-  }, [appliedThemeId])
+  }, [selectedThemeId])
 
   useEffect(() => {
     document.documentElement.dataset.reducedMotion = String(reducedMotion)
@@ -71,13 +69,10 @@ function App() {
         event.preventDefault()
         searchRef.current?.focus()
       }
-      if (event.key === 'Escape' && previewThemeId) {
-        setPreviewThemeId(null)
-      }
     }
     document.addEventListener('keydown', handleShortcut)
     return () => document.removeEventListener('keydown', handleShortcut)
-  }, [previewThemeId])
+  }, [])
 
   useEffect(() => () => {
     if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current)
@@ -111,13 +106,11 @@ function App() {
 
   const applyTheme = (style: VisualStyle) => {
     setSelectedThemeId(style.id)
-    setPreviewThemeId(null)
     showToast(`已应用：${style.name}`)
   }
 
   const clearTheme = () => {
     setSelectedThemeId(null)
-    setPreviewThemeId(null)
     showToast('已恢复默认图鉴样式')
   }
 
@@ -144,9 +137,9 @@ function App() {
         onToggleMotion={() => setReducedMotion((current) => !current)}
       />
 
-      <aside className={`theme-status ${appliedStyle ? 'active' : ''} ${previewThemeId ? 'previewing' : ''}`} aria-live="polite">
+      <aside className={`theme-status ${appliedStyle ? 'active' : ''}`} aria-live="polite">
         <div className="theme-status-copy">
-          <span>{previewThemeId ? '正在预览' : '当前主题'}</span>
+          <span>当前主题</span>
           <strong>{appliedStyle?.name ?? '默认图鉴'}</strong>
           <small>{appliedStyle?.en ?? 'Style Atlas Default'}</small>
         </div>
@@ -173,7 +166,7 @@ function App() {
         <section className="gallery-section" id="gallery" aria-labelledby="gallery-title">
           <div className="section-heading">
             <div><p className="eyebrow">STYLE LIBRARY</p><h2 id="gallery-title">选择一种视觉语言</h2></div>
-            <p>悬停卡片即可让整站实时预览该主题，点击卡片锁定样式；右下角按钮可继续查看场景、风险、配色和 CSS Token。</p>
+            <p>鼠标悬停只会高亮卡片，不会切换网页主题。点击卡片才会应用主题并保存选择；右下角可查看场景、风险、配色和 CSS Token。</p>
           </div>
 
           <div className="style-grid">
@@ -185,10 +178,8 @@ function App() {
                 total={styles.length}
                 favorite={favoriteSet.has(style.id)}
                 selected={selectedThemeId === style.id}
-                previewing={previewThemeId === style.id}
                 onApply={applyTheme}
                 onOpen={setActiveStyle}
-                onPreview={setPreviewThemeId}
                 onToggleFavorite={toggleFavorite}
               />
             ))}

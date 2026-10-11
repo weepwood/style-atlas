@@ -60,7 +60,6 @@ html[data-atlas-theme] .search-box { border-radius: var(--atlas-control-radius);
 .theme-status-palette { display: flex; }
 .theme-status-palette i { width: 15px; height: 30px; border: 2px solid var(--surface); border-radius: 999px; margin-left: -5px; box-shadow: 0 1px 5px rgba(0,0,0,.12); }
 .theme-status button { padding: 8px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2); color: var(--ink); font-size: 10px; cursor: pointer; }
-.theme-status.previewing { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,.2); }
 
 .style-apply {
   display: block;
@@ -73,7 +72,6 @@ html[data-atlas-theme] .search-box { border-radius: var(--atlas-control-radius);
   cursor: pointer;
 }
 .style-card.selected { outline: 3px solid var(--accent); outline-offset: 4px; }
-.style-card.previewing:not(.selected) { border-color: var(--accent); }
 .style-card.selected::after {
   content: "ACTIVE";
   position: absolute;
@@ -96,8 +94,8 @@ html[data-atlas-theme] .search-box { border-radius: var(--atlas-control-radius);
   font-size: 9px;
   font-weight: 800;
 }
-.style-card.selected .apply-hint,
-.style-card.previewing .apply-hint { border-color: var(--accent); background: var(--accent); color: #fff; }
+.style-card:not(.selected):hover .apply-hint, .style-card:not(.selected):focus-within .apply-hint { border-color: var(--accent); color: var(--accent); }
+.style-card.selected .apply-hint { border-color: var(--accent); background: var(--accent); color: #fff; }
 .detail-button {
   position: absolute;
   right: 18px;

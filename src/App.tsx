@@ -7,6 +7,7 @@ import { Hero } from './components/Hero'
 import { FilterBar } from './components/FilterBar'
 import { StyleCard } from './components/StyleCard'
 import { StyleDialog } from './components/StyleDialog'
+import { ClientAtlas } from './components/ClientAtlas'
 
 function getInitialTheme() {
   const saved = window.localStorage.getItem('style-atlas-theme')
@@ -200,6 +201,8 @@ function App() {
             </div>
           )}
         </section>
+
+        <ClientAtlas />
 
         <section className="decision-guide" aria-labelledby="guide-title">
           <div className="section-heading inverse">

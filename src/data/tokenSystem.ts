@@ -131,10 +131,14 @@ export function hoverColor(s: TokenSettings, component: ComponentSettings) {
 // Emits official-format Token objects. App-specific metadata lives under a dollar-prefixed extension group.
 export function exportDtcg(profile: TokenProfile | TokenSettings, styleName: string): string {
   const p = isTokenProfile(profile) ? profile : { modes: { light: profile, dark: profile }, component: defaultComponents }
-  const base = p.modes.light
-  const sp = steps(base)
   const primitiveMode = (mode: TokenMode) => Object.fromEntries(colorRoles.map(key => [key, leaf('color', dtcgColor(p.modes[mode].colors[key]))]))
-  const semanticMode = (mode: TokenMode) => Object.fromEntries(colorRoles.map(key => [key, leaf('color', `{primitive.color.${mode}.${key}}`)]))
+  const semanticMode = (mode: TokenMode) => ({
+    color: Object.fromEntries(colorRoles.map(key => [key, leaf('color', `{primitive.color.${mode}.${key}}`)])),
+    spacing: { controlGap: leaf('dimension', `{primitive.spacing.${mode}.step2}`), sectionGap: leaf('dimension', `{primitive.spacing.${mode}.step5}`) },
+    radius: { control: leaf('dimension', `{primitive.radius.${mode}.md}`), card: leaf('dimension', `{primitive.radius.${mode}.lg}`) },
+    typography: { fontFamily: leaf('fontFamily', `{primitive.typography.${mode}.fontFamily}`) },
+    motion: { fast: leaf('duration', `{primitive.motion.${mode}.fast}`), regular: leaf('duration', `{primitive.motion.${mode}.regular}`) },
+  })
   const componentMode = (mode: TokenMode) => ({
     button: { primary: {
       background: leaf('color', `{semantic.${mode}.color.accent}`),
@@ -142,6 +146,7 @@ export function exportDtcg(profile: TokenProfile | TokenSettings, styleName: str
       hoverBackground: leaf('color', dtcgColor(hoverColor(p.modes[mode], p.component))),
       focusRing: leaf('color', `{semantic.${mode}.color.accent}`),
       disabledOpacity: leaf('number', p.component.disabledOpacity),
+      radius: leaf('dimension', `{semantic.${mode}.radius.control}`),
     } },
     input: {
       background: leaf('color', `{semantic.${mode}.color.surface}`),
@@ -149,6 +154,7 @@ export function exportDtcg(profile: TokenProfile | TokenSettings, styleName: str
       border: leaf('color', `{semantic.${mode}.color.border}`),
       focusRing: leaf('color', `{semantic.${mode}.color.accent}`),
       disabledOpacity: leaf('number', p.component.disabledOpacity),
+      radius: leaf('dimension', `{semantic.${mode}.radius.control}`),
     },
   })
   const doc = {
@@ -165,17 +171,13 @@ export function exportDtcg(profile: TokenProfile | TokenSettings, styleName: str
     } },
     primitive: {
       color: { light: primitiveMode('light'), dark: primitiveMode('dark') },
-      spacing: Object.fromEntries(sp.map((size, i) => [`step${i + 1}`, dim(size)])),
-      radius: { sm: dim(base.radius / 2), md: dim(base.radius), lg: dim(base.radius * 2) },
-      typography: { fontFamily: leaf('fontFamily', fontStacks[base.font].split(',').map(v => v.trim().replace(/^"|"$/g, ''))),
-        fontSize: { sm: dim(12), md: dim(14), lg: dim(18), title: dim(28) } },
-      motion: { fast: leaf('duration', { value: base.motion ? 150 : 0, unit: 'ms' }), regular: leaf('duration', { value: base.motion ? 240 : 0, unit: 'ms' }) },
+      spacing: Object.fromEntries(tokenModes.map(mode => [mode, Object.fromEntries(steps(p.modes[mode]).map((size, i) => [`step${i + 1}`, dim(size)]))])),
+      radius: Object.fromEntries(tokenModes.map(mode => [mode, { sm: dim(p.modes[mode].radius / 2), md: dim(p.modes[mode].radius), lg: dim(p.modes[mode].radius * 2) }])),
+      typography: Object.fromEntries(tokenModes.map(mode => [mode, { fontFamily: leaf('fontFamily', fontStacks[p.modes[mode].font].split(',').map(v => v.trim().replace(/^"|"$/g, ''))),
+        fontSize: { sm: dim(12), md: dim(14), lg: dim(18), title: dim(28) } }])),
+      motion: Object.fromEntries(tokenModes.map(mode => [mode, { fast: leaf('duration', { value: p.modes[mode].motion ? 150 : 0, unit: 'ms' }), regular: leaf('duration', { value: p.modes[mode].motion ? 240 : 0, unit: 'ms' }) }])),
     },
-    semantic: {
-      light: { color: semanticMode('light') }, dark: { color: semanticMode('dark') },
-      spacing: { controlGap: leaf('dimension', '{primitive.spacing.step2}'), sectionGap: leaf('dimension', '{primitive.spacing.step5}') },
-      radius: { control: leaf('dimension', '{primitive.radius.md}'), card: leaf('dimension', '{primitive.radius.lg}') },
-    },
+    semantic: { light: semanticMode('light'), dark: semanticMode('dark') },
     component: { light: componentMode('light'), dark: componentMode('dark'),
       control: { height: dim(p.component.controlHeight), focusWidth: dim(p.component.focusWidth) } },
   }
@@ -267,7 +269,10 @@ export function exportWpf(profile: TokenProfile | TokenSettings): string {
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 ${modeColors('light')}
 ${modeColors('dark')}
-  <CornerRadius x:Key="UiControlRadius">${p.modes.light.radius}</CornerRadius>
+  <CornerRadius x:Key="UiLightControlRadius">${p.modes.light.radius}</CornerRadius>
+  <CornerRadius x:Key="UiDarkControlRadius">${p.modes.dark.radius}</CornerRadius>
+  <Color x:Key="UiLightButtonHoverColor">${hoverColor(p.modes.light, p.component)}</Color>
+  <Color x:Key="UiDarkButtonHoverColor">${hoverColor(p.modes.dark, p.component)}</Color>
   <x:Double x:Key="UiControlHeight">${p.component.controlHeight}</x:Double>
   <x:Double x:Key="UiDisabledOpacity">${p.component.disabledOpacity}</x:Double>
 </ResourceDictionary>
@@ -351,6 +356,8 @@ export function importDtcg(input: string): TokenProfile {
     verify(input.foreground, 'color', `{semantic.${mode}.color.text}`, `component.${mode}.input.foreground`)
     verify(input.border, 'color', `{semantic.${mode}.color.border}`, `component.${mode}.input.border`)
     verify(input.focusRing, 'color', `{semantic.${mode}.color.accent}`, `component.${mode}.input.focusRing`)
+    verify(btn.radius, 'dimension', `{semantic.${mode}.radius.control}`, `component.${mode}.button.primary.radius`)
+    verify(input.radius, 'dimension', `{semantic.${mode}.radius.control}`, `component.${mode}.input.radius`)
     verify(btn.disabledOpacity, 'number', component.disabledOpacity, `component.${mode}.button.primary.disabledOpacity`)
     verify(input.disabledOpacity, 'number', component.disabledOpacity, `component.${mode}.input.disabledOpacity`)
     if (readColor(btn.hoverBackground, `component.${mode}.button.primary.hoverBackground`) !== hoverColor(modes[mode], component)) throw new Error(`component.${mode}.button.primary.hoverBackground 与设定不一致`)
@@ -367,6 +374,21 @@ export function importDtcg(input: string): TokenProfile {
   for (const mode of tokenModes) {
     const semantic = object(field(root.semantic, mode, 'semantic'), `semantic.${mode}`)
     if (!semantic.color) throw new Error(`semantic.${mode}.color 缺失`)
+    const spacing = object(field(primitive.spacing, mode, 'primitive.spacing'), `primitive.spacing.${mode}`)
+    steps(modes[mode]).forEach((value, i) => validateDim(spacing[`step${i + 1}`], value, `primitive.spacing.${mode}.step${i + 1}`))
+    const radius = object(field(primitive.radius, mode, 'primitive.radius'), `primitive.radius.${mode}`)
+    validateDim(radius.md, modes[mode].radius, `primitive.radius.${mode}.md`)
+    validateDim(radius.lg, modes[mode].radius * 2, `primitive.radius.${mode}.lg`)
+    const semSpacing = object(semantic.spacing, `semantic.${mode}.spacing`)
+    const semRadius = object(semantic.radius, `semantic.${mode}.radius`)
+    const tokenAlias = (token: unknown, type: string, expected: string, path: string) => {
+      const t = object(token, path)
+      if (t.$type !== type || t.$value !== expected) throw new Error(`${path} 引用无效`)
+    }
+    tokenAlias(semSpacing.controlGap, 'dimension', `{primitive.spacing.${mode}.step2}`, `semantic.${mode}.spacing.controlGap`)
+    tokenAlias(semSpacing.sectionGap, 'dimension', `{primitive.spacing.${mode}.step5}`, `semantic.${mode}.spacing.sectionGap`)
+    tokenAlias(semRadius.control, 'dimension', `{primitive.radius.${mode}.md}`, `semantic.${mode}.radius.control`)
+    tokenAlias(semRadius.card, 'dimension', `{primitive.radius.${mode}.lg}`, `semantic.${mode}.radius.card`)
   }
   return { modes, component }
 }

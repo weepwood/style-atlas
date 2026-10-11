@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { VisualStyle } from '../types/style'
 import { StylePreview } from './StylePreview'
+import { getMotionProfile } from '../data/motionProfiles'
 
 interface StyleDialogProps {
   style: VisualStyle | null
@@ -50,6 +51,17 @@ export function StyleDialog({ style, onClose, onCopy }: StyleDialogProps) {
               <section><h3>适合场景</h3><ul>{style.bestFor.map((item) => <li key={item}>{item}</li>)}</ul></section>
               <section><h3>常见风险</h3><ul>{style.risks.map((item) => <li key={item}>{item}</li>)}</ul></section>
             </div>
+
+            <section className="motion-profile">
+              <div className="detail-title-row"><h3>这套风格的交互节奏</h3><span>统一规范 / 差异化建议</span></div>
+              <div className="motion-profile-grid">
+                <div><small>节奏</small><strong>{getMotionProfile(style).name}</strong></div>
+                <div><small>反馈时长</small><strong>{getMotionProfile(style).duration}</strong></div>
+                <div><small>缓动曲线</small><strong>{getMotionProfile(style).easing}</strong></div>
+              </div>
+              <p>{getMotionProfile(style).principle}</p>
+              <p className="motion-profile-note">注意：{getMotionProfile(style).caution}</p>
+            </section>
 
             <section className="palette-section">
               <div className="detail-title-row"><h3>建议配色</h3><span>点击色块复制</span></div>

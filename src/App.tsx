@@ -8,6 +8,7 @@ import { FilterBar } from './components/FilterBar'
 import { StyleCard } from './components/StyleCard'
 import { StyleDialog } from './components/StyleDialog'
 import { ClientAtlas } from './components/ClientAtlas'
+import { MotionLab } from './components/MotionLab'
 
 function getInitialTheme() {
   const saved = window.localStorage.getItem('style-atlas-theme')
@@ -22,7 +23,9 @@ function App() {
   const [favorites, setFavorites] = useLocalStorage<string[]>('style-atlas-favorites', [])
   const [selectedThemeId, setSelectedThemeId] = useLocalStorage<string | null>('style-atlas-selected-theme', null)
   const [theme, setTheme] = useState<'light' | 'dark'>(getInitialTheme)
-  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const [motionOverride, setMotionOverride] = useLocalStorage<boolean | null>('style-atlas-motion-override', null)
+  const [systemReducedMotion, setSystemReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const reducedMotion = motionOverride ?? systemReducedMotion
   const [toast, setToast] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
   const toastTimerRef = useRef<number | null>(null)
@@ -62,6 +65,13 @@ function App() {
   useEffect(() => {
     document.documentElement.dataset.reducedMotion = String(reducedMotion)
   }, [reducedMotion])
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setSystemReducedMotion(media.matches)
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
@@ -134,7 +144,7 @@ function App() {
         dark={theme === 'dark'}
         reducedMotion={reducedMotion}
         onToggleTheme={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}
-        onToggleMotion={() => setReducedMotion((current) => !current)}
+        onToggleMotion={() => setMotionOverride(current => !(current ?? systemReducedMotion))}
       />
 
       <aside className={`theme-status ${appliedStyle ? 'active' : ''}`} aria-live="polite">
@@ -166,7 +176,7 @@ function App() {
         <section className="gallery-section" id="gallery" aria-labelledby="gallery-title">
           <div className="section-heading">
             <div><p className="eyebrow">STYLE LIBRARY</p><h2 id="gallery-title">选择一种视觉语言</h2></div>
-            <p>鼠标悬停只会高亮卡片，不会切换网页主题。点击卡片才会应用主题并保存选择；右下角可查看场景、风险、配色和 CSS Token。</p>
+            <p>每款风格拥有独立组件布局与设计细节。悬停只高亮卡片，点击才应用全站主题；右下角可以查看动效节奏、风险、配色和 CSS Token。</p>
           </div>
 
           <div className="style-grid">
@@ -192,6 +202,8 @@ function App() {
             </div>
           )}
         </section>
+
+        <MotionLab reducedMotion={reducedMotion} motionCustomized={motionOverride !== null} onToggleMotion={() => setMotionOverride(current => !(current ?? systemReducedMotion))} onFollowSystem={() => setMotionOverride(null)} />
 
         <ClientAtlas />
 

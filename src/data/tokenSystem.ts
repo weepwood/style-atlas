@@ -266,15 +266,15 @@ export function exportWpf(profile: TokenProfile | TokenSettings): string {
   // WPF ResourceDictionary has no CSS-style mode selector: export two explicitly keyed palettes.
   const modeColors = (mode: TokenMode) => colorRoles.map(k => `  <Color x:Key="Ui${mode === 'light' ? 'Light' : 'Dark'}${nameMap[k]}Color">${p.modes[mode].colors[k]}</Color>\n  <SolidColorBrush x:Key="Ui${mode === 'light' ? 'Light' : 'Dark'}${nameMap[k]}Brush" Color="{StaticResource Ui${mode === 'light' ? 'Light' : 'Dark'}${nameMap[k]}Color}" />`).join('\n')
   return `<!-- Style Atlas: explicitly choose UiLight* or UiDark* resources in WPF. -->
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 ${modeColors('light')}
 ${modeColors('dark')}
   <CornerRadius x:Key="UiLightControlRadius">${p.modes.light.radius}</CornerRadius>
   <CornerRadius x:Key="UiDarkControlRadius">${p.modes.dark.radius}</CornerRadius>
   <Color x:Key="UiLightButtonHoverColor">${hoverColor(p.modes.light, p.component)}</Color>
   <Color x:Key="UiDarkButtonHoverColor">${hoverColor(p.modes.dark, p.component)}</Color>
-  <x:Double x:Key="UiControlHeight">${p.component.controlHeight}</x:Double>
-  <x:Double x:Key="UiDisabledOpacity">${p.component.disabledOpacity}</x:Double>
+  <sys:Double x:Key="UiControlHeight">${p.component.controlHeight}</sys:Double>
+  <sys:Double x:Key="UiDisabledOpacity">${p.component.disabledOpacity}</sys:Double>
 </ResourceDictionary>
 `
 }

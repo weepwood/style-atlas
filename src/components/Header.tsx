@@ -13,6 +13,8 @@ export function Header({ dark, reducedMotion, onToggleTheme, onToggleMotion }: H
         <span><strong>Style Atlas</strong><small>前端视觉风格图鉴</small></span>
       </a>
       <nav className="top-actions" aria-label="页面工具">
+        <a className="collection-nav-link" href="#collection">UI 收藏馆</a>
+        <a className="collection-nav-link" href="#component-lab">元素实验室</a>
         <button className="icon-button" type="button" aria-pressed={reducedMotion} title="减少动画" onClick={onToggleMotion}>
           <span aria-hidden="true">◌</span><span className="button-label">动画</span>
         </button>

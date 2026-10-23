@@ -47,7 +47,7 @@ test('个人收藏：输入、添加、笔记、刷新、导出、删除与恢�
   await card.getByRole('button', { name: '删除' }).click()
   await expect(card).toHaveCount(0)
 
-  await page.locator('#collection input[type="file"]').setInputFiles({
+  await page.locator('#collection .collection-tools input[type="file"]').setInputFiles({
     name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(payload)),
   })
   card = page.locator('#collection .collection-card').filter({ hasText: 'Liquid Dock Test' })
@@ -88,4 +88,49 @@ test('窄屏下导航与收藏馆可达', async ({ page }) => {
   await expect(page.locator('#collection')).toBeInViewport()
   await page.getByRole('link', { name: '元素实验室' }).click()
   await expect(page.locator('#component-lab')).toBeInViewport()
+})
+
+
+test('本地截图：上传、持久化、完整 ZIP 导出、删除和恢复', async ({ page }) => {
+  await page.goto('/style-atlas/')
+  const collection = page.locator('#collection')
+  const item = collection.locator('.collection-card').filter({ hasText: 'Style Atlas' }).first()
+  await item.getByRole('button', { name: '查看详情 ↗' }).click()
+  const detail = page.getByRole('dialog', { name: 'Style Atlas' })
+  await detail.getByRole('button', { name: '上传本地截图' }).click()
+
+  const pngData = await page.evaluate(() => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 120
+    canvas.height = 80
+    const context = canvas.getContext('2d')!
+    context.fillStyle = '#5b6ced'
+    context.fillRect(0, 0, 120, 80)
+    return canvas.toDataURL('image/png').split(',')[1]
+  })
+  await collection.locator('input[aria-label="选择设计截图"]').setInputFiles({
+    name: 'mock-screenshot.png', mimeType: 'image/png', buffer: Buffer.from(pngData, 'base64'),
+  })
+  await expect(detail.getByRole('button', { name: '替换本地截图' })).toBeVisible()
+  await detail.getByRole('button', { name: '关闭设计详情' }).click()
+  await expect(item.locator('.collection-art img')).toHaveAttribute('src', /^blob:/)
+
+  await page.reload()
+  await expect(collection.locator('.collection-card').filter({ hasText: 'Style Atlas' }).first().locator('.collection-art img')).toHaveAttribute('src', /^blob:/)
+
+  const zipEvent = page.waitForEvent('download')
+  await collection.getByRole('button', { name: '导出完整 ZIP' }).click()
+  const zipDownload = await zipEvent
+  const zipBytes = await readFile(await zipDownload.path())
+  expect(zipBytes.subarray(0, 2).toString('utf8')).toBe('PK')
+
+  await collection.locator('.collection-card').filter({ hasText: 'Style Atlas' }).first().getByRole('button', { name: '查看详情 ↗' }).click()
+  await page.getByRole('dialog').getByRole('button', { name: '移除截图' }).click()
+  await expect(page.getByRole('dialog').getByRole('button', { name: '上传本地截图' })).toBeVisible()
+  await page.getByRole('dialog').getByRole('button', { name: '关闭设计详情' }).click()
+
+  await collection.locator('.collection-tools input[type="file"]').setInputFiles({
+    name: 'collection.zip', mimeType: 'application/zip', buffer: zipBytes,
+  })
+  await expect(collection.locator('.collection-card').filter({ hasText: 'Style Atlas' }).first().locator('.collection-art img')).toHaveAttribute('src', /^blob:/)
 })

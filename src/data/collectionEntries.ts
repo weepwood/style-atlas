@@ -18,6 +18,8 @@ export interface CollectionBackup {
   version: 1
   entries: CollectionEntry[]
   favorites: string[]
+  /** Optional for compatibility with previously exported v1 backups. */
+  notes?: Record<string, string>
 }
 
 export const curatedEntries: CollectionEntry[] = [
@@ -78,5 +80,12 @@ export function parseCollectionBackup(value: unknown): CollectionBackup {
   }
   const ids = new Set(data.entries.map((entry: CollectionEntry) => entry.id))
   if (ids.size !== data.entries.length) throw new Error('备份中存在重复 ID')
+  if (data.notes !== undefined) {
+    if (!data.notes || typeof data.notes !== 'object' || Array.isArray(data.notes)) throw new Error('设计笔记格式无效')
+    const notes = Object.entries(data.notes as Record<string, unknown>)
+    if (notes.length > 600 || !notes.every(([id, note]) => id.length > 0 && id.length <= 100 && typeof note === 'string' && note.length <= 2000)) {
+      throw new Error('设计笔记包含非法字段或超出数量限制')
+    }
+  }
   return data as unknown as CollectionBackup
 }

@@ -1,7 +1,7 @@
 import JSZip from 'jszip'
-import { curatedEntries, parseCollectionBackup } from './collectionEntries'
-import type { CollectionBackup } from './collectionEntries'
-import { MAX_IMAGE_STORED_BYTES } from './collectionImageStore'
+import { curatedEntries, parseCollectionBackup } from './collectionEntries.ts'
+import type { CollectionBackup } from './collectionEntries.ts'
+import { MAX_IMAGE_STORED_BYTES } from './collectionImageStore.ts'
 
 const MAX_ARCHIVE_BYTES = 80 * 1024 * 1024
 const MAX_IMAGES = 500

@@ -12,6 +12,7 @@ import './styles/themes.css'
 import './styles/new-style-previews.css'
 import './styles/theme-refinements.css'
 import './styles/interaction-fixes.css'
+import './styles/collection-atlas.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

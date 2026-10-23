@@ -156,3 +156,14 @@
   .top-actions .button-label { display: none; }
   .collection-card-footer { flex-wrap: wrap; }
 }
+
+
+/* Local screenshot manager */
+.collection-storage-notice { margin: 2px 0 18px; color: var(--muted); font-size: 11px; line-height: 1.75; }
+.collection-image-tools { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 10px 0 20px; }
+.collection-image-tools > span { color: var(--muted); font-size: 11px; line-height: 1.6; }
+.collection-image-tools > div { display: flex; flex-wrap: wrap; gap: 7px; }
+.collection-image-tools button { background: var(--surface-2); font-size: 11px; }
+.collection-tools button:disabled, .collection-modal button:disabled { opacity: .5; cursor: wait; }
+.collection-modal-image { height: min(44vw,270px); min-height: 160px; object-fit: contain; background: var(--surface-2); }
+@media (max-width: 600px) { .collection-image-tools { align-items: flex-start; flex-direction: column; } }

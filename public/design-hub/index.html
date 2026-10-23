@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f6fa">
+  <meta name="description" content="Design Hub — 搜集、筛选、分析与复刻 UI 的个人设计资源工作台">
+  <title>Design Hub · Weepwood</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./data.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="./" aria-label="Design Hub 首页">
+        <span class="brand-logo"><span>✳</span></span>
+        <span class="brand-text"><strong>Design Hub</strong><small>BY WEEPWOOD</small></span>
+      </a>
+      <div class="workspace"><span class="workspace-avatar">W</span><span><b>Personal workspace</b><small>My creative collection</small></span><span class="chevron">⌄</span></div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">WORKSPACE</div>
+        <button class="nav-item active" data-view="discover"><span class="nav-icon">▦</span>灵感发现</button>
+        <button class="nav-item" data-view="library"><span class="nav-icon">▤</span>资源目录<span class="nav-count" id="nav-total">31</span></button>
+        <button class="nav-item" data-view="favorites"><span class="nav-icon">♡</span>我的收藏<span class="nav-count" id="nav-favorites">0</span></button>
+        <button class="nav-item" data-view="analysis"><span class="nav-icon">◫</span>设计分析</button>
+        <button class="nav-item" data-view="replica"><span class="nav-icon">⌘</span>复刻工作台</button>
+      </div>
+      <div class="sidebar-group side-categories">
+        <div class="sidebar-label">COLLECTIONS</div>
+        <div id="sidebar-categories"></div>
+      </div>
+      <div class="side-bottom">
+        <div class="side-tip"><span class="tip-icon">✦</span><strong>From inspiration to creation</strong><p>收藏好设计，然后拆解它、创造属于自己的组件。</p><button id="open-replica">打开复刻工作台 <span>↗</span></button></div>
+        <a class="back-atlas" href="../">← 返回 Style Atlas</a>
+      </div>
+    </aside>
+    <div class="main-shell">
+      <header class="topbar">
+        <div class="breadcrumbs"><span>Workspace</span><span class="slash">/</span><strong id="breadcrumb">灵感发现</strong></div>
+        <div class="top-actions">
+          <span class="local-badge"><span class="green-dot"></span> LOCAL FIRST</span>
+          <button class="icon-btn" id="theme-toggle" title="切换主题" aria-label="切换主题">◐</button>
+          <button class="subtle-btn" id="import-trigger">↥ 导入</button>
+          <button class="primary-btn" id="add-resource-trigger"><span>＋</span> 添加资源</button>
+        </div>
+      </header>
+      <main class="content" id="content">
+        <div id="view-root"></div>
+      </main>
+    </div>
+  </div>
+  <div class="drawer-scrim" id="drawer-scrim" hidden></div>
+  <aside class="detail-drawer" id="detail-drawer" aria-label="资源详情" aria-hidden="true"></aside>
+  <dialog id="resource-modal" class="resource-modal">
+    <form id="resource-form" method="dialog">
+      <div class="modal-heading"><div><div class="eyebrow">NEW RESOURCE</div><h2>添加设计资源</h2></div><button class="icon-btn" type="button" data-close-modal aria-label="关闭">✕</button></div>
+      <label>网站名称<input name="name" maxlength="80" required placeholder="例如：Beautiful UI" autocomplete="off"></label>
+      <label>网站地址<input name="url" type="url" maxlength="500" required placeholder="https://example.com"></label>
+      <label>分类<select name="category" id="new-category"></select></label>
+      <label>简短描述<textarea name="description" rows="3" maxlength="360" placeholder="这个资源最值得参考的地方..."></textarea></label>
+      <div class="modal-actions"><button type="button" class="subtle-btn" data-close-modal>取消</button><button type="submit" class="primary-btn">保存资源</button></div>
+    </form>
+  </dialog>
+  <input id="import-file" type="file" accept=".json,application/json" hidden>
+  <input id="screenshot-file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript>请启用 JavaScript 以使用 Design Hub。</noscript>
+</body>
+</html>

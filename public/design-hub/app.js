@@ -69,7 +69,7 @@ function chips(){
 function resourceCard(r){
  var pattern=categoryIndex(r)%3;
  return '<article class="resource-card"><div class="resource-image" data-pattern="'+pattern+'" style="'+colorStyle(r)+'">'+
- previewMarkup()+'<span class="priority-flag '+esc(r.priority)+'">'+esc(r.priority)+' · '+(r.status==="active"?"资源参考":r.status==="redirect"?"已迁移":"已停用")+'</span>'+
+ (shots[r.id]?'<img class="card-upload" alt="用户保存的网站截图" src="'+esc(shots[r.id])+'">':previewMarkup())+'<span class="priority-flag '+esc(r.priority)+'">'+esc(r.priority)+' · '+(r.status==="active"?"资源参考":r.status==="redirect"?"已迁移":"已停用")+'</span>'+
  '<button class="card-bookmark '+(favorites.has(r.id)?"is-favorite":"")+'" aria-label="'+(favorites.has(r.id)?"取消收藏":"收藏资源")+'" data-favorite="'+esc(r.id)+'">'+(favorites.has(r.id)?"♥":"♡")+'</button></div>'+
  '<div class="resource-info"><div class="resource-main"><span class="resource-favicon">'+esc(r.name.slice(0,1).toUpperCase())+'</span><div class="resource-names"><strong>'+esc(r.name)+'</strong><span>'+esc(domain(r.url))+'</span></div></div>'+
  '<p class="resource-desc">'+esc(r.description)+'</p><div class="card-foot"><span class="category-tag">'+esc(r.category)+'</span><button class="card-open" data-detail="'+esc(r.id)+'">查看详情 ↗</button></div></div></article>';
@@ -276,14 +276,14 @@ function takeScreenshot(id,file){
  req.onsuccess=function(){
   var db=req.result,tx=db.transaction("shots","readwrite");
   tx.objectStore("shots").put(file,id);
-  tx.oncomplete=function(){if(shots[id])URL.revokeObjectURL(shots[id]);shots[id]=URL.createObjectURL(file);if(state.selected===id)renderDetail();toast("截图已保存到浏览器本地");db.close();};
+  tx.oncomplete=function(){if(shots[id])URL.revokeObjectURL(shots[id]);shots[id]=URL.createObjectURL(file);render();if(state.selected===id)renderDetail();toast("截图已保存到浏览器本地");db.close();};
   tx.onerror=function(){toast("截图保存失败，可能是存储空间不足");db.close();};
  };
 }
 function deleteScreenshot(id){
  var req=indexedDB.open("weepwood-design-hub-shots",1);
  req.onupgradeneeded=function(){if(!req.result.objectStoreNames.contains("shots"))req.result.createObjectStore("shots");};
- req.onsuccess=function(){var db=req.result,tx=db.transaction("shots","readwrite");tx.objectStore("shots").delete(id);tx.oncomplete=function(){if(shots[id])URL.revokeObjectURL(shots[id]);delete shots[id];db.close();renderDetail();toast("截图已移除");};};
+ req.onsuccess=function(){var db=req.result,tx=db.transaction("shots","readwrite");tx.objectStore("shots").delete(id);tx.oncomplete=function(){if(shots[id])URL.revokeObjectURL(shots[id]);delete shots[id];db.close();render();renderDetail();toast("截图已移除");};};
  req.onerror=function(){toast("无法移除截图");};
 }
 function loadScreenshots(){
@@ -292,7 +292,7 @@ function loadScreenshots(){
  req.onupgradeneeded=function(){if(!req.result.objectStoreNames.contains("shots"))req.result.createObjectStore("shots");};
  req.onsuccess=function(){var db=req.result,tx=db.transaction("shots","readonly");var store=tx.objectStore("shots");var cursor=store.openCursor();
  cursor.onsuccess=function(e){var cur=e.target.result;if(cur){if(cur.value instanceof Blob)shots[cur.key]=URL.createObjectURL(cur.value);cur.continue();}};
- tx.oncomplete=function(){db.close();if(state.selected)renderDetail();};};
+ tx.oncomplete=function(){db.close();render();if(state.selected)renderDetail();};};
 }
 document.addEventListener("click",function(e){
  var target=e.target.closest("button,a[data-view]");

@@ -45,7 +45,7 @@ function loadEntryNotes(): Record<string, string> {
     const parsed = JSON.parse(window.localStorage.getItem(NOTES_KEY) || '{}') as unknown
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
     const entries = Object.entries(parsed as Record<string, unknown>)
-      .filter(([id, note]) => id.length > 0 && id.length <= 100 && typeof note === 'string' && note.length <= 2000)
+      .filter((entry): entry is [string, string] => entry[0].length > 0 && entry[0].length <= 100 && typeof entry[1] === 'string' && entry[1].length <= 2000)
       .slice(0, 600)
     return Object.fromEntries(entries)
   } catch { return {} }

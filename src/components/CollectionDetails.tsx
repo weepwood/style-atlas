@@ -19,15 +19,19 @@ interface DetailsProps {
   onSaveNote: (id: string, note: string) => void
   onEdit: (entry: CollectionEntry) => void
   onClose: () => void
+  screenshotUrl?: string
+  onPickScreenshot: (id: string) => void
+  onRemoveScreenshot: (id: string) => void
 }
 
-export function CollectionDetails({ entry, isPersonal, note, onSaveNote, onEdit, onClose }: DetailsProps) {
+export function CollectionDetails({ entry, isPersonal, note, onSaveNote, onEdit, onClose, screenshotUrl, onPickScreenshot, onRemoveScreenshot }: DetailsProps) {
   const [text, setText] = useState(note)
   const [copied, setCopied] = useState(false)
   const [saved, setSaved] = useState(false)
   const closeRef = useRef<HTMLButtonElement>(null)
   const modalRef = useRef<HTMLElement>(null)
   const preview = verifiedPreviews[entry.id]
+  const image = screenshotUrl || entry.imageUrl
 
   useEffect(() => { setText(note); setCopied(false) }, [entry.id, note])
   useEffect(() => {
@@ -68,11 +72,16 @@ export function CollectionDetails({ entry, isPersonal, note, onSaveNote, onEdit,
           <button ref={closeRef} type="button" aria-label="关闭设计详情" onClick={onClose}>✕</button>
         </header>
         <div className="collection-modal-content">
-          {entry.imageUrl ? <img className="collection-modal-image" loading="lazy" src={entry.imageUrl} alt={entry.title + ' 的收藏预览图'} /> : (
+          {image ? <img className="collection-modal-image" loading="lazy" src={image} alt={entry.title + ' 的收藏预览图'} /> : (
             <div className="collection-modal-fallback" role="img" aria-label="未设置项目截图，使用抽象形状占位">
               <span>UI / {entry.category}</span><strong>{entry.title}</strong><i>VISUAL REFERENCE</i>
             </div>
           )}
+          <div className="collection-image-tools">
+            <span>{screenshotUrl ? '本地截图 · 已存入此浏览器' : entry.imageUrl ? '外部图片 URL · 由第三方服务器加载' : '未设置截图 · 显示原创占位示意'}</span>
+            <div><button type="button" onClick={() => onPickScreenshot(entry.id)}>{screenshotUrl ? '替换本地截图' : '上传本地截图'}</button>
+            {screenshotUrl && <button type="button" onClick={() => onRemoveScreenshot(entry.id)}>移除截图</button>}</div>
+          </div>
           <p id="collection-detail-summary">{entry.summary || '暂无简介。'}</p>
           <div className="collection-modal-tags">{entry.tags.map((tag) => <span key={tag}>{tag}</span>)}<span>{entry.status}</span></div>
           {entry.note && <blockquote className="collection-modal-description">{entry.note}</blockquote>}
@@ -86,7 +95,7 @@ export function CollectionDetails({ entry, isPersonal, note, onSaveNote, onEdit,
             <textarea maxLength={2000} rows={4} value={text} onChange={(event) => { setText(event.target.value); setSaved(false) }} placeholder="记录喜欢的配色、动画细节、想要复刻的交互和实现想法……"/>
           </label>
           <div className="collection-modal-note-footer">
-            <small>笔记保存在当前浏览器，可随 JSON 备份导出；不自动同步 GitHub。</small>
+            <small>笔记保存在当前浏览器，可随 JSON 或 ZIP 备份导出；截图仅包含在 ZIP 中。</small>
             <button type="button" onClick={() => { onSaveNote(entry.id, text.trim()); setSaved(true) }}>{saved ? '✓ 已保存' : '保存笔记'}</button>
           </div>
         </div>

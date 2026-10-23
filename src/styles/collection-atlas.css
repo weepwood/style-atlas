@@ -142,3 +142,17 @@
   .collection-modal-content { padding: 15px 18px 20px; }
   .collection-modal-note-footer { align-items: start; flex-direction: column; }
 }
+
+
+/* Keep both gallery shortcuts reachable on narrow mobile screens. */
+@media(max-width: 550px) {
+  .topbar { width: calc(100% - 16px); padding: 8px; gap: 8px; }
+  .brand { gap: 4px; flex: 0 0 auto; }
+  .brand-mark { width: 30px; height: 30px; }
+  .brand strong, .brand small { display: none; }
+  .top-actions { gap: 4px; min-width: 0; }
+  .collection-nav-link { min-height: 33px; font-size: 10px; padding: 0 8px; }
+  .top-actions .icon-button { min-height: 33px; padding: 0 7px; }
+  .top-actions .button-label { display: none; }
+  .collection-card-footer { flex-wrap: wrap; }
+}

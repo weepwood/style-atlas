@@ -30,6 +30,8 @@
 - 个人新增条目保存于当前浏览器 `localStorage`：`style-atlas-personal-collection-v1`。
 - 喜欢状态保存于 `style-atlas-collection-favorites-v1`。
 - 个人条目最大 500 条；导入 JSON 最大 2 MB；逐条校验字段、分类、URL 和 ID，不覆盖内置种子。
+- 任意内置或个人条目均可以通过「查看详情」编写自己的设计笔记，存储于 `style-atlas-entry-notes-v1`。已知的部分在线演示链接可在详情内直接打开，其它项目不臆造在线地址。
+- 备份仍采用 v1，新增可选 `notes` 字段。旧版没有 notes 的备份仍可导入，笔记最长 2000 字，最多 600 条。
 - 导出 v1 JSON 包括个人条目和喜欢状态；不重复导出种子数据。
 - 导入采取合并策略：相同 ID 更新、其他个人条目保留，喜欢状态合并去重。
 - **GitHub Pages 没有写入权限**：浏览器里新增的收藏不会自动写入 GitHub，也不会跨设备同步。

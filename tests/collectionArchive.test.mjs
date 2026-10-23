@@ -36,9 +36,9 @@ test('导入 ZIP：拒绝恶意路径、伪造格式或损坏清单', async () =
     format: 'weepwood-ui-atlas', version: 1,
     images: [{ id: 'style-atlas', file: '../escape.webp', type: 'image/webp' }],
   }))
-  await assert.rejects(() => parseCollectionArchive(await zip.generateAsync({ type: 'blob' })))
+  await assert.rejects(async () => parseCollectionArchive(await zip.generateAsync({ type: 'blob' })))
   zip.file('manifest.json', JSON.stringify({ format: 'wrong', version: 1, images: [] }))
-  await assert.rejects(() => parseCollectionArchive(await zip.generateAsync({ type: 'blob' })))
+  await assert.rejects(async () => parseCollectionArchive(await zip.generateAsync({ type: 'blob' })))
 })
 
 test('旧 JSON 备份仍无需升级为 ZIP', async () => {

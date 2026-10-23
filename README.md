@@ -46,6 +46,13 @@ GitHub Pages：<https://weepwood.github.io/style-atlas/>
 - 源码为 `public/frame-lab/index.html`，独立原生 HTML/CSS/JavaScript；Vite 构建时原样复制到 `dist/frame-lab/index.html`。
 - Dribbble 风格属于教学归纳，非实时热榜；界面是原创示例，附相关作品与 Figma 官方学习链接。
 
+## Design Hub · 个人 UI 设计资源平台
+
+- 独立入口：[Design Hub](https://weepwood.github.io/style-atlas/design-hub/)（主分支部署成功后可访问）。
+- 包含 31 个设计网站、7 个分类、搜索与收藏、可选原站嵌入预览、人工六维研究与本地截图、4 种原创视觉模板、HTML 导出。
+- 无需新服务端；数据本地保存，支持 JSON 备份；外站可能禁止 iframe。
+- [详细说明与开发文档](docs/DESIGN-HUB.md)。
+
 ## 技术栈
 
 - React 19

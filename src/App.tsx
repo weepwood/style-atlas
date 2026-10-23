@@ -10,6 +10,7 @@ import { StyleDialog } from './components/StyleDialog'
 import { ClientAtlas } from './components/ClientAtlas'
 import { MotionLab } from './components/MotionLab'
 import { CollectionAtlas } from './components/CollectionAtlas'
+import { ComponentPlayground } from './components/ComponentPlayground'
 
 function getInitialTheme() {
   const saved = window.localStorage.getItem('style-atlas-theme')
@@ -165,6 +166,7 @@ function App() {
       <main id="top">
         <Hero styleCount={styles.length} onRandom={openRandomStyle} />
         <CollectionAtlas />
+        <ComponentPlayground reducedMotion={reducedMotion} />
         <section aria-label="视觉与结构实验室" style={{ maxWidth: 1280, margin: '16px auto 34px', padding: '0 24px' }}>
           <a href={`${import.meta.env.BASE_URL}frame-lab/`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, padding: '22px 26px', borderRadius: 18, background: 'linear-gradient(115deg,#242238,#473a78)', color: '#fff', textDecoration: 'none', boxShadow: '0 10px 28px rgba(21,20,54,.15)' }}>
             <span style={{ display: 'grid', gap: 7 }}>

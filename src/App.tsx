@@ -77,7 +77,12 @@ function App() {
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
-      if (event.key === '/' && document.activeElement !== searchRef.current) {
+      const target = event.target
+      const typing = target instanceof HTMLElement && (
+        target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
+        || Boolean(target.closest('[role="dialog"]'))
+      )
+      if (event.key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey && !typing) {
         event.preventDefault()
         searchRef.current?.focus()
       }

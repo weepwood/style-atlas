@@ -47,7 +47,7 @@ test('个人收藏：输入、添加、笔记、刷新、导出、删除与恢�
   await card.getByRole('button', { name: '删除' }).click()
   await expect(card).toHaveCount(0)
 
-  await page.locator('#collection .collection-tools input[type="file"]').setInputFiles({
+  await page.locator('#collection input[aria-label="选择收藏备份 JSON 或 ZIP 文件"]').setInputFiles({
     name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(payload)),
   })
   card = page.locator('#collection .collection-card').filter({ hasText: 'Liquid Dock Test' })
@@ -129,7 +129,7 @@ test('本地截图：上传、持久化、完整 ZIP 导出、删除和恢复', 
   await expect(page.getByRole('dialog').getByRole('button', { name: '上传本地截图' })).toBeVisible()
   await page.getByRole('dialog').getByRole('button', { name: '关闭设计详情' }).click()
 
-  await collection.locator('.collection-tools input[type="file"]').setInputFiles({
+  await collection.locator('input[aria-label="选择收藏备份 JSON 或 ZIP 文件"]').setInputFiles({
     name: 'collection.zip', mimeType: 'application/zip', buffer: zipBytes,
   })
   await expect(collection.locator('.collection-card').filter({ hasText: 'Style Atlas' }).first().locator('.collection-art img')).toHaveAttribute('src', /^blob:/)

@@ -13,6 +13,7 @@ import './styles/new-style-previews.css'
 import './styles/theme-refinements.css'
 import './styles/interaction-fixes.css'
 import './styles/collection-atlas.css'
+import './styles/component-playground.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

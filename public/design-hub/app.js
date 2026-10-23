@@ -14,7 +14,7 @@ function domain(value){try{return new URL(value).hostname.replace(/^www\./,"");}
 function safeObj(raw){return raw && typeof raw==="object" && !Array.isArray(raw) ? raw : {};}
 function readSaved(){try{return safeObj(JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}"));}catch(e){return {};}}
 var loaded=readSaved();
-var resources=SEED_RESOURCES.concat(Array.isArray(loaded.custom)?loaded.custom.filter(function(r){return r && typeof r.name==="string" && urlOK(r.url);}).slice(0,500):[]);
+var resources=SEED_RESOURCES.concat(Array.isArray(loaded.custom)?loaded.custom.filter(function(r){return r && typeof r.name==="string" && r.name.length<=80 && urlOK(r.url);}).slice(0,500).map(function(r,i){return {id:/^custom-[a-zA-Z0-9_-]{1,100}$/.test(r.id||"")?r.id:"custom-restored-"+i,name:r.name,url:urlOK(r.url),category:CATEGORIES.includes(r.category)?r.category:CATEGORIES[0],priority:["S","A","B","C"].includes(r.priority)?r.priority:"B",description:String(r.description||"").slice(0,360),tags:Array.isArray(r.tags)?r.tags.filter(function(t){return typeof t==="string";}).slice(0,10):[],status:"active",custom:true,createdAt:String(r.createdAt||"2026-10-23")};}):[]);
 var favorites=new Set(Array.isArray(loaded.favorites)?loaded.favorites:[]);
 var reviews=safeObj(loaded.reviews);
 var workbench=Object.assign({template:"glass",accent:"#6676ee",radius:18,space:20,brand:"Studio North"},safeObj(loaded.workbench));
@@ -80,8 +80,11 @@ function catalog(isDiscover){
  var title=state.view==="favorites"?"我的收藏":isDiscover?"精选设计资源":"全部设计资源";
  var main='<div class="section-head"><h2>'+title+' <small>· '+list.length+' 条</small></h2>'+(isDiscover?'<button data-view="library">浏览全部 →</button>':'<button data-export="json">导出资源 →</button>')+'</div>';
  main+=toolbar()+chips();
- if(!list.length)return main+'<div class="empty"><div class="empty-icon">⌕</div><h3>这里暂时没有匹配资源</h3><p>试试清除筛选，或者添加你的第一个设计参考。</p><button class="outline-btn" data-reset-filters>清除筛选</button></div>';
- return main+'<div class="grid">'+list.map(resourceCard).join("")+'</div>';
+ return main+'<div id="catalog-results">'+catalogResults(list)+'</div>';
+}
+function catalogResults(list){
+ if(!list.length)return '<div class="empty"><div class="empty-icon">⌕</div><h3>这里暂时没有匹配资源</h3><p>试试清除筛选，或者添加你的第一个设计参考。</p><button class="outline-btn" data-reset-filters>清除筛选</button></div>';
+ return '<div class="grid">'+list.map(resourceCard).join("")+'</div>';
 }
 function discover(){
  return header("让灵感有迹可循。","收集值得研究的界面，拆解体验细节，将灵感转化为自己的 UI 组件。","WELCOME BACK","<button class=\"outline-btn\" data-export=\"json\">↓ 导出收藏数据</button>")+
@@ -201,7 +204,8 @@ function normalizeImport(raw){
   var normalizedURL=urlOK(r.url);if(seen.has(normalizedURL))return;seen.add(normalizedURL);
   var existing=SEED_RESOURCES.find(function(s){return s.url===normalizedURL;});
   if(existing)return;
-  list.push({id:"custom-"+(Date.now().toString(36))+"-"+i,name:r.name.trim(),url:normalizedURL,category:CATEGORIES.includes(r.category)?r.category:CATEGORIES[0],priority:["S","A","B","C"].includes(r.priority)?r.priority:"B",description:String(r.description||"").slice(0,360),tags:Array.isArray(r.tags)?r.tags.filter(function(t){return typeof t==="string";}).slice(0,10).map(function(t){return t.slice(0,40);}):[],status:"active",createdAt:new Date().toISOString().slice(0,10),custom:true});
+  var importedId=(typeof r.id==="string" && /^custom-[a-zA-Z0-9_-]{1,100}$/.test(r.id) && !resources.some(function(x){return x.id===r.id;}))?r.id:"custom-"+Date.now().toString(36)+"-"+i;
+  list.push({id:importedId,name:r.name.trim(),url:normalizedURL,category:CATEGORIES.includes(r.category)?r.category:CATEGORIES[0],priority:["S","A","B","C"].includes(r.priority)?r.priority:"B",description:String(r.description||"").slice(0,360),tags:Array.isArray(r.tags)?r.tags.filter(function(t){return typeof t==="string";}).slice(0,10).map(function(t){return t.slice(0,40);}):[],status:"active",createdAt:new Date().toISOString().slice(0,10),custom:true});
  });
  return {list:list,input:input};
 }
@@ -320,10 +324,9 @@ document.addEventListener("input",function(e){
  if(target.id==="resource-search"){
   var v=target.value,selection=target.selectionStart;state.query=v;
   // 防止输入时重新挂载 input 导致光标和中文输入法丢失，只更新列表区域。
-  if(!e.isComposing){var root=byId("view-root");var shell=root.querySelector(".grid"),empty=root.querySelector(".empty");var list=filtered();if(state.view==="discover")list=list.slice(0,9);
+  if(!e.isComposing){var root=byId("view-root"),holder=byId("catalog-results");var list=filtered();if(state.view==="discover")list=list.slice(0,9);
    var summary=root.querySelector(".section-head small");if(summary)summary.textContent="· "+list.length+" 条";
-   if(shell){shell.innerHTML=list.map(resourceCard).join("");shell.hidden=!list.length;}
-   if(empty)empty.hidden=!!list.length;
+   if(holder)holder.innerHTML=catalogResults(list);
   }
   return;
  }

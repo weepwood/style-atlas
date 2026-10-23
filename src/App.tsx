@@ -173,6 +173,16 @@ function App() {
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', color: '#34255c', borderRadius: 12, padding: '11px 17px', fontWeight: 700, fontSize: 13 }}>打开实验室 ↗</span>
           </a>
         </section>
+        <section aria-label="Design Hub UI 设计资源平台" style={{ maxWidth: 1280, margin: '16px auto 34px', padding: '0 24px' }}>
+          <a href={import.meta.env.BASE_URL + 'design-hub/'} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, padding: '22px 26px', borderRadius: 18, background: 'linear-gradient(120deg,#24334f,#5769ad)', color: '#fff', textDecoration: 'none', boxShadow: '0 10px 28px rgba(21,20,54,.12)' }}>
+            <span style={{ display: 'grid', gap: 7 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', color: '#c4d3ff' }}>NEW · DESIGN / HUB</span>
+              <strong style={{ fontSize: 'clamp(18px,2.2vw,26px)', lineHeight: 1.3 }}>个人 UI 设计资源工作台</strong>
+              <span style={{ fontSize: 13, color: '#e0e7fa' }}>31 个资源 · 收藏与分类 · 设计分析 · 原创复刻模板 · HTML 导出</span>
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', color: '#2d427d', borderRadius: 12, padding: '11px 17px', fontWeight: 700, fontSize: 13 }}>打开资源库 ↗</span>
+          </a>
+        </section>
         <FilterBar
           categories={categories}
           activeCategory={activeCategory}

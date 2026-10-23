@@ -44,6 +44,15 @@
 
 没有提供原图的项目采用 CSS 抽象示意缩略图；**示意图不代表真实项目截图**。以后可以为具有授权的项目手动附上预览图片或独立截图资产。
 
+## 独立 UI 元素实验室（已实现）
+
+- `src/data/playgroundDemos.ts`：6 个自研示例，按按钮、卡片、输入与选择、动效分类。
+- `src/components/ComponentPlayground.tsx`：可选示例、可交互 iframe、安全的 HTML/CSS 代码展示与一键复制。
+- `src/styles/component-playground.css`：响应式实验台、代码区域与移动端适配。
+- 预览使用静态可信的 HTML/CSS 生成 `srcDoc`，iframe 设置空 `sandbox` 和 `no-referrer`；不执行第三方 JS 或导入未知源代码。
+- CI 运行 `tests/playgroundDemos.test.mjs`，检查示例数据、无脚本预览、备份兼容性。
+- 现有全局 `/` 搜索快捷键跳过输入框及弹窗，避免打断收藏表单编辑。
+
 ## 下一阶段
 
 1. 从 Design Style Library 迁移有许可的风格资料和设计提示词，建立来源映射。

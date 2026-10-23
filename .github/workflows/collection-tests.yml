@@ -18,5 +18,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
       - name: Validate collection data and backups
         run: node --experimental-strip-types --test tests/*.test.mjs

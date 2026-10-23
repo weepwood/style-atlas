@@ -48,6 +48,21 @@ export async function parseCollectionArchive(input: Blob): Promise<CompleteArchi
   const manifestFile = zip.file('manifest.json')
   if (!collectionFile || !manifestFile) throw new Error('ZIP 缺少 collection.json 或 manifest.json')
   if (zip.files && Object.keys(zip.files).length > MAX_IMAGES + 4) throw new Error('ZIP 文件数量过多')
+  // JSZip stores the declared uncompressed sizes for loaded ZIP entries.
+  // Reject suspicious archives *before* allocating the expanded payload.
+  let declaredTotal = 0
+  for (const [name, file] of Object.entries(zip.files)) {
+    if (file.dir) continue
+    const data = file as unknown as { _data?: { uncompressedSize?: number } }
+    const size = data._data?.uncompressedSize
+    if (typeof size !== 'number' || !Number.isSafeInteger(size) || size < 0) {
+      throw new Error('ZIP 文件大小信息不完整')
+    }
+    const max = name === 'collection.json' ? 2 * 1024 * 1024 : name === 'manifest.json' ? 256 * 1024 : MAX_IMAGE_STORED_BYTES
+    if (size > max) throw new Error('ZIP 内有过大的文件')
+    declaredTotal += size
+    if (declaredTotal > MAX_ARCHIVE_BYTES + 2 * 1024 * 1024) throw new Error('ZIP 解压后内容过大')
+  }
   const backup = parseCollectionBackup(JSON.parse(await collectionFile.async('string')) as unknown)
   const manifest = JSON.parse(await manifestFile.async('string')) as unknown
   if (!manifest || typeof manifest !== 'object') throw new Error('ZIP 清单格式错误')

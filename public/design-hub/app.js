@@ -18,6 +18,12 @@ var resources=SEED_RESOURCES.concat(Array.isArray(loaded.custom)?loaded.custom.f
 var favorites=new Set(Array.isArray(loaded.favorites)?loaded.favorites:[]);
 var reviews=safeObj(loaded.reviews);
 var workbench=Object.assign({template:"glass",accent:"#6676ee",radius:18,space:20,brand:"Studio North"},safeObj(loaded.workbench));
+if(!["glass","minimal","dashboard","bento"].includes(workbench.template))workbench.template="glass";
+if(typeof workbench.brand!=="string")workbench.brand="Studio North";
+workbench.brand=workbench.brand.slice(0,30);
+if(!/^#[\da-fA-F]{6}$/.test(workbench.accent))workbench.accent="#6676ee";
+workbench.radius=Math.max(0,Math.min(32,Number(workbench.radius)||0));
+workbench.space=Math.max(8,Math.min(36,Number(workbench.space)||20));
 var state={view:"discover",category:"all",query:"",priority:"all",sort:"recommended",selected:null,tab:"details",device:"desktop",previewRequested:false};
 var shots={};
 var toastTimer=null;
@@ -69,7 +75,7 @@ function chips(){
 function resourceCard(r){
  var pattern=categoryIndex(r)%3;
  return '<article class="resource-card"><div class="resource-image" data-pattern="'+pattern+'" style="'+colorStyle(r)+'">'+
- (shots[r.id]?'<img class="card-upload" alt="用户保存的网站截图" src="'+esc(shots[r.id])+'">':previewMarkup())+'<span class="priority-flag '+esc(r.priority)+'">'+esc(r.priority)+' · '+(r.status==="active"?"资源参考":r.status==="redirect"?"已迁移":"已停用")+'</span>'+
+ (shots[r.id]?'<img class="card-upload" alt="用户保存的网站截图" src="'+esc(shots[r.id])+'">':previewMarkup())+'<span class="priority-flag '+esc(r.priority)+'">'+esc(r.priority)+' · '+(r.status==="active"?(shots[r.id]?"本地截图":"示意预览"):r.status==="redirect"?"已迁移":"已停用")+'</span>'+
  '<button class="card-bookmark '+(favorites.has(r.id)?"is-favorite":"")+'" aria-label="'+(favorites.has(r.id)?"取消收藏":"收藏资源")+'" data-favorite="'+esc(r.id)+'">'+(favorites.has(r.id)?"♥":"♡")+'</button></div>'+
  '<div class="resource-info"><div class="resource-main"><span class="resource-favicon">'+esc(r.name.slice(0,1).toUpperCase())+'</span><div class="resource-names"><strong>'+esc(r.name)+'</strong><span>'+esc(domain(r.url))+'</span></div></div>'+
  '<p class="resource-desc">'+esc(r.description)+'</p><div class="card-foot"><span class="category-tag">'+esc(r.category)+'</span><button class="card-open" data-detail="'+esc(r.id)+'">查看详情 ↗</button></div></div></article>';
@@ -228,10 +234,10 @@ async function importJson(file){
  persist();render();toast("导入完成，新增 "+added.length+" 条有效资源");
 }
 function addResource(form){
- var name=String(form.name.value).trim(),url=urlOK(form.url.value),category=form.category.value;
+ var name=String(form.elements.namedItem("name").value).trim(),url=urlOK(form.elements.namedItem("url").value),category=form.elements.namedItem("category").value;
  if(!name || !url || !CATEGORIES.includes(category)){toast("请填写有效的网站名称、HTTP(S) 地址和分类");return;}
  if(resources.some(function(r){return r.url===url;})){toast("此网址已在资源库中");return;}
- resources.unshift({id:"custom-"+Date.now().toString(36),name:name.slice(0,80),url:url,category:category,priority:"B",description:String(form.description.value||"").slice(0,360),tags:[],status:"active",custom:true,createdAt:new Date().toISOString().slice(0,10)});
+ resources.unshift({id:"custom-"+Date.now().toString(36),name:name.slice(0,80),url:url,category:category,priority:"B",description:String(form.elements.namedItem("description").value||"").slice(0,360),tags:[],status:"active",custom:true,createdAt:new Date().toISOString().slice(0,10)});
  persist();byId("resource-modal").close();form.reset();goView("library");toast("资源已添加");
 }
 function wbCSS(){

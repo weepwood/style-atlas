@@ -3,6 +3,8 @@ import type { FormEvent } from 'react'
 import { collectionCategories, curatedEntries, isCollectionEntry, parseCollectionBackup, validWebUrl } from '../data/collectionEntries'
 import type { CollectionCategory, CollectionEntry, CollectionStatus } from '../data/collectionEntries'
 import { CollectionDetails } from './CollectionDetails'
+import { useCollectionScreenshots } from '../hooks/useCollectionScreenshots'
+import { generateCollectionArchive, parseCollectionArchive } from '../data/collectionArchive'
 
 const STORAGE_KEY = 'style-atlas-personal-collection-v1'
 const FAVORITES_KEY = 'style-atlas-collection-favorites-v1'
@@ -68,6 +70,10 @@ export function CollectionAtlas() {
   const [draft, setDraft] = useState<EntryDraft>(blankDraft)
   const [feedback, setFeedback] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+  const screenshotFileRef = useRef<HTMLInputElement>(null)
+  const screenshotTargetRef = useRef<string | null>(null)
+  const screenshots = useCollectionScreenshots()
+  const [busy, setBusy] = useState(false)
 
   useEffect(() => {
     try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(personalEntries)) }
@@ -158,6 +164,7 @@ export function CollectionAtlas() {
     setPersonalEntries((current) => current.filter((entry) => entry.id !== id))
     setFavorites((current) => current.filter((value) => value !== id))
     setEntryNotes((current) => Object.fromEntries(Object.entries(current).filter(([key]) => key !== id)))
+    void screenshots.remove(id).catch((error: unknown) => setFeedback(error instanceof Error ? error.message : '本地截图删除失败'))
     if (editId === id) closeEditor()
     setFeedback('个人收藏已删除。')
   }
@@ -166,37 +173,90 @@ export function CollectionAtlas() {
     setFavorites((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id])
   }
 
-  function exportBackup() {
-    const content = JSON.stringify({ version: 1, entries: personalEntries, favorites, notes: entryNotes }, null, 2)
-    const href = URL.createObjectURL(new Blob([content], { type: 'application/json;charset=utf-8' }))
+  function downloadBackup(content: Blob, name: string) {
+    const href = URL.createObjectURL(content)
     const anchor = document.createElement('a')
     anchor.href = href
-    anchor.download = 'weepwood-ui-atlas-collection.json'
+    anchor.download = name
     document.body.appendChild(anchor)
     anchor.click()
     anchor.remove()
-    window.setTimeout(() => URL.revokeObjectURL(href), 3000)
-    setFeedback('已生成 JSON 备份文件；内置案例会随网站自动提供，不重复导出。')
+    window.setTimeout(() => URL.revokeObjectURL(href), 30_000)
+  }
+
+  function exportBackup() {
+    const content = JSON.stringify({ version: 1, entries: personalEntries, favorites, notes: entryNotes }, null, 2)
+    downloadBackup(new Blob([content], { type: 'application/json;charset=utf-8' }), 'weepwood-ui-atlas-collection.json')
+    setFeedback('已导出 JSON 收藏与笔记（不含图片）；包含截图请使用「导出完整 ZIP」。')
+  }
+
+  async function exportFullArchive() {
+    if (busy) return
+    setBusy(true)
+    try {
+      const backup = { version: 1 as const, entries: personalEntries, favorites, notes: entryNotes }
+      const images = await screenshots.list()
+      const archive = await generateCollectionArchive(backup, images.map(({ id, blob }) => ({ id, blob })))
+      downloadBackup(archive, 'weepwood-ui-atlas-complete.zip')
+      setFeedback('完整 ZIP 已生成：含收藏、笔记及 ' + images.length + ' 张本地截图。')
+    } catch (error) {
+      setFeedback(error instanceof Error ? '导出失败：' + error.message : '无法导出截图')
+    } finally { setBusy(false) }
+  }
+
+  function pickScreenshot(id: string) {
+    screenshotTargetRef.current = id
+    screenshotFileRef.current?.click()
+  }
+
+  async function receiveScreenshot(file: File | undefined) {
+    const id = screenshotTargetRef.current
+    if (!id || !file || busy) return
+    setBusy(true)
+    try {
+      await screenshots.save(id, file)
+      setFeedback('截图已优化并保存在本浏览器，可通过完整 ZIP 备份。')
+    } catch (error) {
+      setFeedback(error instanceof Error ? '图片保存失败：' + error.message : '图片保存失败')
+    } finally {
+      setBusy(false)
+      screenshotTargetRef.current = null
+      if (screenshotFileRef.current) screenshotFileRef.current.value = ''
+    }
+  }
+
+  async function removeLocalScreenshot(id: string) {
+    if (busy) return
+    setBusy(true)
+    try { await screenshots.remove(id); setFeedback('已移除本地截图。') }
+    catch (error) { setFeedback(error instanceof Error ? error.message : '删除截图失败') }
+    finally { setBusy(false) }
   }
 
   async function importBackup(file: File | undefined) {
     if (!file) return
     try {
-      if (file.size > 2 * 1024 * 1024) throw new Error('备份文件不能超过 2 MB')
-      const backup = parseCollectionBackup(JSON.parse(await file.text()) as unknown)
+      if (busy) return
+      setBusy(true)
+      const isArchive = file.name.toLowerCase().endsWith('.zip')
+      if (!isArchive && file.size > 2 * 1024 * 1024) throw new Error('JSON 备份文件不能超过 2 MB')
+      const archive = isArchive ? await parseCollectionArchive(file) : null
+      const backup = archive?.backup ?? parseCollectionBackup(JSON.parse(await file.text()) as unknown)
       const knownIds = new Set(personalEntries.map((entry) => entry.id))
       const nextEntries = [...personalEntries.filter((entry) => !backup.entries.some((incoming) => incoming.id === entry.id)), ...backup.entries]
       if (nextEntries.length > 500) throw new Error('合并后超过 500 条上限')
+      if (archive) await screenshots.restore(archive.images)
       setPersonalEntries(nextEntries)
       const validIds = new Set([...curatedEntries.map((entry) => entry.id), ...nextEntries.map((entry) => entry.id)])
       setFavorites((current) => [...new Set([...current, ...backup.favorites])].filter((id) => validIds.has(id)))
       if (backup.notes) {
         setEntryNotes((current) => Object.fromEntries(Object.entries({ ...current, ...backup.notes }).filter(([id]) => validIds.has(id))))
       }
-      setFeedback('导入成功：恢复/更新 ' + backup.entries.length + ' 条个人收藏，其中 ' + backup.entries.filter((entry) => !knownIds.has(entry.id)).length + ' 条为新增。')
+      setFeedback('导入成功：恢复/更新 ' + backup.entries.length + ' 条个人收藏，其中 ' + backup.entries.filter((entry) => !knownIds.has(entry.id)).length + ' 条为新增；截图 ' + (archive?.images.length ?? 0) + ' 张。')
     } catch (error) {
       setFeedback(error instanceof Error ? '导入失败：' + error.message : '导入失败：文件内容无效')
     } finally {
+      setBusy(false)
       if (fileRef.current) fileRef.current.value = ''
     }
   }
@@ -230,9 +290,11 @@ export function CollectionAtlas() {
       <div className="collection-tools">
         <span>显示 {visibleEntries.length} 条 · 个人新增 {personalEntries.length} 条</span>
         <div>
-          <button type="button" onClick={exportBackup}>导出 JSON</button>
-          <button type="button" onClick={() => fileRef.current?.click()}>导入备份</button>
-          <input ref={fileRef} type="file" accept=".json,application/json" hidden aria-label="选择收藏备份 JSON 文件" onChange={(event) => void importBackup(event.target.files?.[0])} />
+          <button type="button" disabled={busy} onClick={exportBackup}>导出 JSON</button>
+          <button type="button" disabled={busy} onClick={() => void exportFullArchive()}>导出完整 ZIP</button>
+          <button type="button" disabled={busy} onClick={() => fileRef.current?.click()}>导入备份</button>
+          <input ref={fileRef} type="file" accept=".json,.zip,application/json,application/zip" hidden aria-label="选择收藏备份 JSON 或 ZIP 文件" onChange={(event) => void importBackup(event.target.files?.[0])} />
+          <input ref={screenshotFileRef} type="file" accept="image/png,image/jpeg,image/webp" hidden aria-label="选择设计截图" onChange={(event) => void receiveScreenshot(event.target.files?.[0])} />
         </div>
       </div>
 
@@ -254,7 +316,8 @@ export function CollectionAtlas() {
         </form>
       )}
 
-      {feedback && <p className="collection-feedback" role="status">{feedback}</p>}
+      {(feedback || screenshots.error) && <p className="collection-feedback" role="status">{feedback || screenshots.error}</p>}
+      <p className="collection-storage-notice">图片仅存于此设备的 IndexedDB，不会自动上传。JSON 不含截图；请用完整 ZIP 进行跨设备备份，导入会按 ID 合并。</p>
 
       <div className="collection-grid">
         {visibleEntries.map((entry) => {
@@ -263,7 +326,7 @@ export function CollectionAtlas() {
           return (
             <article className="collection-card" key={entry.id}>
               <div className={'collection-art collection-art-' + collectionCategories.indexOf(entry.category)}>
-                {entry.imageUrl ? <img loading="lazy" src={entry.imageUrl} alt={entry.title + ' 的预览图'} /> : (
+                {(screenshots.previewUrls[entry.id] || entry.imageUrl) ? <img loading="lazy" src={screenshots.previewUrls[entry.id] || entry.imageUrl} alt={entry.title + ' 的预览图'} /> : (
                   <div className="collection-art-mock" aria-hidden="true"><i/><div><b/><b/><b/></div><span/></div>
                 )}
                 <span className="collection-category-tag">{entry.category}</span>
@@ -294,6 +357,9 @@ export function CollectionAtlas() {
             setFeedback('设计笔记已保存到此浏览器。')
           }}
           onEdit={(entry) => { setDetailEntry(null); startEdit(entry) }}
+          screenshotUrl={screenshots.previewUrls[detailEntry.id]}
+          onPickScreenshot={pickScreenshot}
+          onRemoveScreenshot={(id) => void removeLocalScreenshot(id)}
           onClose={() => setDetailEntry(null)}
         />
       )}

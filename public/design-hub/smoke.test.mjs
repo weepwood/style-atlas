@@ -20,7 +20,7 @@ function element(id) {
     const node = {
       innerHTML: '', textContent: '', hidden: false, value: '', srcdoc: '', style: {},
       dataset: {}, classList: { add() {}, remove() {}, toggle() {} },
-      setAttribute() {}, addEventListener(type, fn) { handlers[id + ':' + type] = fn; },
+      setAttribute() {}, close() {}, addEventListener(type, fn) { handlers[id + ':' + type] = fn; },
       querySelector() { return { textContent: '' }; }
     };
     elements.set(id, node);
@@ -78,4 +78,11 @@ assert.ok(element('workbench-frame').srcdoc.includes('--accent:'));
 click({ template: 'minimal' });
 assert.ok(element('workbench-frame').srcdoc.includes('background:#f9f9f8'));
 assert.ok(storage.get('weepwood-design-hub-v1')?.includes('minimal'));
-console.log('Design Hub smoke tests passed (seed, catalog, favorite, search, analysis, replica).');
+const fields = { name: 'My UI Reference', url: 'https://design-reference.example', category: '可复用 UI 组件', description: '自定义来源' };
+handlers['resource-form:submit']({
+  preventDefault() {},
+  target: { elements: { namedItem(name) { return { value: fields[name] }; } }, reset() {} }
+});
+assert.equal(element('nav-total').textContent, 32);
+assert.ok(element('view-root').innerHTML.includes('My UI Reference'));
+console.log('Design Hub smoke tests passed (seed, catalog, favorite, search, analysis, replica, add resource).');

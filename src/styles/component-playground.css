@@ -1,0 +1,83 @@
+.component-lab {
+  width: min(calc(100% - 48px), var(--content));
+  margin: 36px auto 120px;
+  scroll-margin-top: 96px;
+}
+.component-lab-intro {
+  display: flex; justify-content: space-between; align-items: end; gap: 26px;
+  margin: 0 0 26px;
+}
+.component-lab-intro h2 {
+  max-width: 760px; margin: 0; font: 500 clamp(32px, 4vw, 56px)/1.13 Georgia,serif;
+  letter-spacing: -.05em;
+}
+.component-lab-intro p:not(.eyebrow) { max-width: 660px; margin: 16px 0 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.component-lab-intro > a { flex: 0 0 auto; padding: 13px 17px; border: 1px solid var(--line); border-radius: 12px; font-size: 12px; font-weight: 750; text-decoration: none; background: var(--surface); }
+.component-lab-intro > a:hover { border-color: var(--accent); color: var(--accent); }
+.component-lab-layout {
+  display: grid; grid-template-columns: minmax(235px,.75fr) minmax(0,1.75fr);
+  gap: 1px; border: 1px solid var(--line); border-radius: 22px; overflow: hidden;
+  background: var(--line); box-shadow: 0 20px 60px #0000000c;
+}
+.component-lab-library { background: var(--surface); min-width: 0; padding: 18px; }
+.component-lab-tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 21px; }
+.component-lab-tabs button, .component-lab-code-tabs button, .component-lab-copy, .component-lab-workbench-header button {
+  border: 1px solid var(--line); border-radius: 9px; background: transparent; color: var(--muted);
+  padding: 9px 10px; font: 700 11px system-ui; cursor: pointer;
+}
+.component-lab-tabs button[aria-pressed="true"], .component-lab-code-tabs button[aria-pressed="true"] {
+  background: var(--ink); color: var(--page); border-color: var(--ink);
+}
+.component-lab-list { display: grid; gap: 5px; }
+.component-lab-list-item {
+  display: flex; gap: 12px; align-items: center; width: 100%; padding: 11px 10px;
+  border: 1px solid transparent; border-radius: 11px; color: var(--ink); background: transparent;
+  cursor: pointer; text-align: left;
+}
+.component-lab-list-item:hover { background: var(--surface-2); }
+.component-lab-list-item[aria-pressed="true"] { border-color: color-mix(in srgb,var(--accent) 45%,var(--line)); background: var(--surface-2); }
+.component-lab-list-icon {
+  display: grid; flex: 0 0 35px; height: 35px; place-items: center; border-radius: 10px;
+  background: color-mix(in srgb,var(--accent) 12%,var(--surface)); color: var(--accent); font-size: 19px;
+}
+.component-lab-list-item > span:nth-child(2) { display: grid; gap: 5px; min-width: 0; flex: 1; }
+.component-lab-list-item strong { font-size: 13px; }
+.component-lab-list-item small { color: var(--muted); font-size: 10px; }
+.component-lab-list-item > span:last-child { color: var(--muted); }
+.component-lab-hint { margin: 23px 7px 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+.component-lab-workbench { min-width: 0; background: var(--surface); }
+.component-lab-workbench-header { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 19px 22px 16px; }
+.component-lab-workbench-header small { color: var(--accent); font: 700 10px monospace; letter-spacing: .06em; }
+.component-lab-workbench-header h3 { margin: 7px 0 0; font-size: 20px; }
+.component-lab-workbench-header button { white-space: nowrap; }
+.component-lab-canvas { margin: 0 18px 18px; border: 1px solid var(--line); border-radius: 15px; overflow: hidden; background: #edf1f6; }
+.component-lab-canvas iframe { width: 100%; min-height: 320px; height: 320px; border: 0; display: block; }
+.component-lab-code-heading { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin: 0 18px; }
+.component-lab-code-tabs { display: flex; gap: 5px; }
+.component-lab-copy { background: var(--surface-2); color: var(--ink); }
+.component-lab-code {
+  margin: 10px 18px 0; padding: 20px; min-height: 170px; max-height: 290px; overflow: auto;
+  border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb,var(--surface-2) 77%,var(--surface));
+  color: var(--ink); font: 12px/1.8 "JetBrains Mono",ui-monospace,SFMono-Regular,Consolas,monospace;
+  white-space: pre; tab-size: 2;
+}
+.component-lab-bottom { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px 22px; gap: 15px; }
+.component-lab-bottom p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.component-lab-bottom span { font-size: 11px; color: var(--accent); white-space: nowrap; }
+.component-lab button:focus-visible, .component-lab a:focus-visible, .component-lab pre:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media(max-width: 860px) {
+  .component-lab-layout { grid-template-columns: 1fr; }
+  .component-lab-intro { align-items: start; flex-direction: column; }
+  .component-lab-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .component-lab-hint { margin-top: 12px; }
+}
+@media(max-width: 540px) {
+  .component-lab { width: calc(100% - 24px); }
+  .component-lab-library { padding: 12px; }
+  .component-lab-list { grid-template-columns: 1fr; }
+  .component-lab-workbench-header { padding: 15px; }
+  .component-lab-canvas { margin: 0 10px 13px; }
+  .component-lab-code-heading,.component-lab-code { margin-left: 10px; margin-right: 10px; }
+  .component-lab-bottom { align-items: start; flex-direction: column; }
+}
+@media(prefers-reduced-motion:reduce) { .component-lab * { scroll-behavior: auto; } }

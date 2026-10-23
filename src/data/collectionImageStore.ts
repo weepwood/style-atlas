@@ -52,6 +52,25 @@ export async function writeScreenshot(id: string, blob: Blob): Promise<void> {
   await storeRequest('readwrite', (store) => store.put({ id, blob, updatedAt: Date.now() }))
 }
 
+
+export async function writeScreenshotsBatch(images: Array<{ id: string; blob: Blob }>): Promise<void> {
+  if (images.length > 500 || new Set(images.map((image) => image.id)).size !== images.length) throw new Error('截图数量或 ID 无效')
+  for (const { id, blob } of images) {
+    if (!id || id.length > 100 || blob.size === 0 || blob.size > MAX_IMAGE_STORED_BYTES
+      || !['image/webp', 'image/jpeg', 'image/png'].includes(blob.type)) throw new Error('截图格式或大小无效')
+  }
+  if (!images.length) return
+  const db = await openDatabase()
+  await new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(STORE, 'readwrite')
+    const store = transaction.objectStore(STORE)
+    images.forEach(({ id, blob }) => store.put({ id, blob, updatedAt: Date.now() }))
+    transaction.oncomplete = () => { db.close(); resolve() }
+    transaction.onerror = () => { db.close(); reject(transaction.error || new Error('批量导入截图失败')) }
+    transaction.onabort = () => { db.close(); reject(transaction.error || new Error('批量导入截图已取消')) }
+  })
+}
+
 export async function optimizeScreenshot(file: Blob): Promise<Blob> {
   if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
     throw new Error('仅允许 PNG、JPEG 和 WebP；不接收 SVG 或动画格式')

@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { collectionCategories, curatedEntries, isCollectionEntry, parseCollectionBackup, validWebUrl } from '../data/collectionEntries'
 import type { CollectionCategory, CollectionEntry, CollectionStatus } from '../data/collectionEntries'
+import { CollectionDetails } from './CollectionDetails'
 
 const STORAGE_KEY = 'style-atlas-personal-collection-v1'
 const FAVORITES_KEY = 'style-atlas-collection-favorites-v1'
+const NOTES_KEY = 'style-atlas-entry-notes-v1'
 const statuses: CollectionStatus[] = ['已收藏', '复刻中', '已实现']
 
 interface EntryDraft {
@@ -38,6 +40,17 @@ function loadFavorites(): string[] {
   } catch { return [] }
 }
 
+function loadEntryNotes(): Record<string, string> {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(NOTES_KEY) || '{}') as unknown
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
+    const entries = Object.entries(parsed as Record<string, unknown>)
+      .filter(([id, note]) => id.length > 0 && id.length <= 100 && typeof note === 'string' && note.length <= 2000)
+      .slice(0, 600)
+    return Object.fromEntries(entries)
+  } catch { return {} }
+}
+
 function createId(): string {
   return 'personal-' + (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2))
 }
@@ -45,6 +58,8 @@ function createId(): string {
 export function CollectionAtlas() {
   const [personalEntries, setPersonalEntries] = useState<CollectionEntry[]>(loadPersonalEntries)
   const [favorites, setFavorites] = useState<string[]>(loadFavorites)
+  const [entryNotes, setEntryNotes] = useState<Record<string, string>>(loadEntryNotes)
+  const [detailEntry, setDetailEntry] = useState<CollectionEntry | null>(null)
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<CollectionCategory | '全部'>('全部')
   const [onlyFavorites, setOnlyFavorites] = useState(false)
@@ -62,6 +77,11 @@ export function CollectionAtlas() {
     try { window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites)) }
     catch { setFeedback('收藏状态未能保存，请导出备份。') }
   }, [favorites])
+
+  useEffect(() => {
+    try { window.localStorage.setItem(NOTES_KEY, JSON.stringify(entryNotes)) }
+    catch { setFeedback('设计笔记保存失败，请尝试导出 JSON 备份。') }
+  }, [entryNotes])
 
   const allEntries = useMemo(() => [...personalEntries, ...curatedEntries], [personalEntries])
   const visibleEntries = useMemo(() => {
@@ -137,6 +157,7 @@ export function CollectionAtlas() {
     if (!window.confirm('删除这条个人收藏？此操作不能撤销，除非你保存了备份。')) return
     setPersonalEntries((current) => current.filter((entry) => entry.id !== id))
     setFavorites((current) => current.filter((value) => value !== id))
+    setEntryNotes((current) => Object.fromEntries(Object.entries(current).filter(([key]) => key !== id)))
     if (editId === id) closeEditor()
     setFeedback('个人收藏已删除。')
   }
@@ -146,7 +167,7 @@ export function CollectionAtlas() {
   }
 
   function exportBackup() {
-    const content = JSON.stringify({ version: 1, entries: personalEntries, favorites }, null, 2)
+    const content = JSON.stringify({ version: 1, entries: personalEntries, favorites, notes: entryNotes }, null, 2)
     const href = URL.createObjectURL(new Blob([content], { type: 'application/json;charset=utf-8' }))
     const anchor = document.createElement('a')
     anchor.href = href
@@ -169,6 +190,9 @@ export function CollectionAtlas() {
       setPersonalEntries(nextEntries)
       const validIds = new Set([...curatedEntries.map((entry) => entry.id), ...nextEntries.map((entry) => entry.id)])
       setFavorites((current) => [...new Set([...current, ...backup.favorites])].filter((id) => validIds.has(id)))
+      if (backup.notes) {
+        setEntryNotes((current) => Object.fromEntries(Object.entries({ ...current, ...backup.notes }).filter(([id]) => validIds.has(id))))
+      }
       setFeedback('导入成功：恢复/更新 ' + backup.entries.length + ' 条个人收藏，其中 ' + backup.entries.filter((entry) => !knownIds.has(entry.id)).length + ' 条为新增。')
     } catch (error) {
       setFeedback(error instanceof Error ? '导入失败：' + error.message : '导入失败：文件内容无效')
@@ -251,7 +275,7 @@ export function CollectionAtlas() {
                 <div className="collection-chips">{entry.tags.slice(0, 3).map((tag) => <span key={tag}>{tag}</span>)}</div>
                 {entry.note && <p className="collection-note" title={entry.note}>{entry.note}</p>}
                 <div className="collection-card-footer">
-                  <a href={entry.url} target="_blank" rel="noopener noreferrer">查看来源 ↗</a>
+                  <button type="button" className="collection-detail-button" onClick={() => setDetailEntry(entry)}>查看详情 ↗</button>
                   {personal ? <div><button type="button" onClick={() => startEdit(entry)}>编辑</button><button type="button" onClick={() => removeEntry(entry.id)}>删除</button></div> : <small>{entry.status}</small>}
                 </div>
               </div>
@@ -260,6 +284,19 @@ export function CollectionAtlas() {
         })}
       </div>
       {visibleEntries.length === 0 && <div className="collection-empty">没有找到匹配的设计。试试其他搜索词或关闭筛选。</div>}
+      {detailEntry && (
+        <CollectionDetails
+          entry={detailEntry}
+          isPersonal={personalEntries.some((item) => item.id === detailEntry.id)}
+          note={entryNotes[detailEntry.id] || ''}
+          onSaveNote={(id, note) => {
+            setEntryNotes((current) => ({ ...current, [id]: note }))
+            setFeedback('设计笔记已保存到此浏览器。')
+          }}
+          onEdit={(entry) => { setDetailEntry(null); startEdit(entry) }}
+          onClose={() => setDetailEntry(null)}
+        />
+      )}
       <p className="collection-footnote">这是设计灵感索引，不代表仓库代码已经合并，也不是可直接安装的组件包。组件化成果继续存放于 weepwood-UI。</p>
     </section>
   )

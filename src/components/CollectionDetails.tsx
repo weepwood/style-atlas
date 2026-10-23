@@ -24,6 +24,7 @@ interface DetailsProps {
 export function CollectionDetails({ entry, isPersonal, note, onSaveNote, onEdit, onClose }: DetailsProps) {
   const [text, setText] = useState(note)
   const [copied, setCopied] = useState(false)
+  const [saved, setSaved] = useState(false)
   const closeRef = useRef<HTMLButtonElement>(null)
   const modalRef = useRef<HTMLElement>(null)
   const preview = verifiedPreviews[entry.id]
@@ -82,11 +83,11 @@ export function CollectionDetails({ entry, isPersonal, note, onSaveNote, onEdit,
             {isPersonal && <button type="button" onClick={() => onEdit(entry)}>编辑收藏</button>}
           </div>
           <label className="collection-modal-note">我的设计笔记
-            <textarea maxLength={2000} rows={4} value={text} onChange={(event) => setText(event.target.value)} placeholder="记录喜欢的配色、动画细节、想要复刻的交互和实现想法……"/>
+            <textarea maxLength={2000} rows={4} value={text} onChange={(event) => { setText(event.target.value); setSaved(false) }} placeholder="记录喜欢的配色、动画细节、想要复刻的交互和实现想法……"/>
           </label>
           <div className="collection-modal-note-footer">
             <small>笔记保存在当前浏览器，可随 JSON 备份导出；不自动同步 GitHub。</small>
-            <button type="button" onClick={() => onSaveNote(entry.id, text.trim())}>保存笔记</button>
+            <button type="button" onClick={() => { onSaveNote(entry.id, text.trim()); setSaved(true) }}>{saved ? '✓ 已保存' : '保存笔记'}</button>
           </div>
         </div>
       </section>

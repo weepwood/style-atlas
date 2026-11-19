@@ -163,31 +163,35 @@ function App() {
 
       <main id="top">
         <Hero styleCount={styles.length} onRandom={openRandomStyle} />
-        <section className="frame-lab-wrap" aria-label="视觉与结构实验室">
-          <a className="frame-lab-banner" href={`${import.meta.env.BASE_URL}frame-lab/`}>
-            <span className="frame-lab-copy">
-              <span className="frame-lab-kicker">FRAME / LAB</span>
-              <strong>Dribbble 视觉 × Figma 设计结构</strong>
-              <span className="frame-lab-desc">12 种视觉语言 · 交互工作台 · Auto Layout 结构拆解 · 组件实验室</span>
-            </span>
-            <span className="frame-lab-cta">打开实验室 <span aria-hidden="true">↗</span></span>
-          </a>
-        </section>
-        <FilterBar
-          categories={categories}
-          activeCategory={activeCategory}
-          query={query}
-          resultCount={visibleStyles.length}
-          searchRef={searchRef}
-          onCategoryChange={setActiveCategory}
-          onQueryChange={setQuery}
-        />
+
+        <nav className="overview" aria-label="功能分区">
+          <div className="overview-head">
+            <span>功能分区</span>
+            <p>四个相互独立的模块，按编号排布，可从这里直接跳转。</p>
+          </div>
+          <div className="overview-grid">
+            <a href="#gallery"><span className="overview-index">01</span><strong>网页风格图鉴</strong><p>{styles.length} 种视觉语言，搜索、筛选、收藏并一键应用全站主题。</p><em>进入图鉴 ↓</em></a>
+            <a href="#motion-lab"><span className="overview-index">02</span><strong>动效实验室</strong><p>四组可操作的动效模式，体验反馈、导航、展开与通知的节奏。</p><em>体验动效 ↓</em></a>
+            <a href="#client-atlas"><span className="overview-index">03</span><strong>客户端图鉴</strong><p>主流客户端的设计体系与交互样例，可检索、体验与横向对比。</p><em>查看案例 ↓</em></a>
+            <a href="#decision-guide"><span className="overview-index">04</span><strong>选型指南</strong><p>从信息密度、品牌性格、交互成本与维护性出发做选择。</p><em>阅读指南 ↓</em></a>
+          </div>
+        </nav>
 
         <section className="gallery-section" id="gallery" aria-labelledby="gallery-title">
           <div className="section-heading">
-            <div><p className="eyebrow">STYLE LIBRARY</p><h2 id="gallery-title">选择一种视觉语言</h2></div>
+            <div><p className="eyebrow">01 · 网页风格图鉴 — STYLE LIBRARY</p><h2 id="gallery-title">选择一种视觉语言</h2></div>
             <p>每款风格拥有独立组件布局与设计细节。悬停只高亮卡片，点击才应用全站主题；右下角可以查看动效节奏、风险、配色和 CSS Token。</p>
           </div>
+
+          <FilterBar
+            categories={categories}
+            activeCategory={activeCategory}
+            query={query}
+            resultCount={visibleStyles.length}
+            searchRef={searchRef}
+            onCategoryChange={setActiveCategory}
+            onQueryChange={setQuery}
+          />
 
           <div className="style-grid">
             {visibleStyles.map((style) => (
@@ -219,7 +223,7 @@ function App() {
 
         <section className="decision-guide" id="decision-guide" aria-labelledby="guide-title">
           <div className="section-heading inverse">
-            <div><p className="eyebrow">DECISION GUIDE</p><h2 id="guide-title">不要从“流行”开始选择</h2></div>
+            <div><p className="eyebrow">04 · 选型指南 — DECISION GUIDE</p><h2 id="guide-title">不要从“流行”开始选择</h2></div>
             <p>先判断内容密度、品牌气质和用户任务，再决定视觉表现。风格是解决问题的工具，不是页面表面的装饰。</p>
           </div>
           <div className="guide-grid">
@@ -228,6 +232,21 @@ function App() {
             <article><span>03</span><h3>交互成本</h3><p>透明、3D、噪点与复杂动画会增加性能和可访问性成本，应保留降级方案。</p></article>
             <article><span>04</span><h3>长期维护</h3><p>把风格提炼为 Token、组件和约束，避免项目最终变成无法复用的视觉拼贴。</p></article>
           </div>
+        </section>
+
+        <section className="frame-lab-section" aria-labelledby="frame-lab-title">
+          <div className="section-heading">
+            <div><p className="eyebrow">05 · 独立实验室 — FRAME LAB</p><h2 id="frame-lab-title">视觉与结构实验室</h2></div>
+            <p>独立页面，不与上面的图鉴共用筛选与主题。在统一工作台里拆解视觉语言、图层结构与 Auto Layout。</p>
+          </div>
+          <a className="frame-lab-banner" href={`${import.meta.env.BASE_URL}frame-lab/`}>
+            <span className="frame-lab-copy">
+              <span className="frame-lab-kicker">FRAME / LAB ↗ 独立页面</span>
+              <strong>Dribbble 视觉 × Figma 设计结构</strong>
+              <span className="frame-lab-desc">12 种视觉语言 · 交互工作台 · Auto Layout 结构拆解 · 组件实验室</span>
+            </span>
+            <span className="frame-lab-cta">打开实验室 <span aria-hidden="true">↗</span></span>
+          </a>
         </section>
       </main>
 

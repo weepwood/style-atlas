@@ -1,7 +1,5 @@
 .control-panel {
-  position: sticky;
-  top: 82px;
-  z-index: 30;
+  position: static;
   display: grid;
   grid-template-columns: minmax(260px, 1fr) auto auto;
   align-items: center;

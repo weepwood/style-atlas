@@ -61,7 +61,7 @@
   .topbar { width: calc(100% - 20px); margin-top:10px; }
   .hero { grid-template-columns:1fr;width:calc(100% - 32px);padding:68px 0 48px; }
   .hero-stage { min-height: 500px; }
-  .control-panel { position:relative;top:auto;grid-template-columns:1fr;width:calc(100% - 32px);margin-bottom:18px; }.result-count{display:none}
+  .control-panel { position:static;grid-template-columns:1fr;width:calc(100% - 32px);margin-bottom:18px; }.result-count{display:none}
   .gallery-section { width:calc(100% - 32px);padding-top:24px; }
   .section-heading { align-items:flex-start;flex-direction:column;gap:16px; }
   .style-grid { grid-template-columns:1fr; }

@@ -17,7 +17,7 @@ export function MotionLab({ reducedMotion, motionCustomized, onToggleMotion, onF
   const [notice, setNotice] = useState(false)
   return <section className="motion-lab" aria-labelledby="motion-lab-title" id="motion-lab">
     <div className="motion-heading">
-      <div><span className="motion-eyebrow">MOTION DESIGN / INTERACTION PRINCIPLES</span>
+      <div><span className="motion-eyebrow">02 · 动效实验室 — MOTION DESIGN</span>
         <h2 id="motion-lab-title">动效不是装饰，<em>而是行为的解释。</em></h2>
         <p>动效要交代因果关系、视觉层级和操作结果。下方的四种模式可以实际点击体验；所有反馈保持短促，不阻塞下一次操作。</p>
       </div>

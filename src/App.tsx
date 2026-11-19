@@ -166,10 +166,9 @@ function App() {
         <section className="frame-lab-wrap" aria-label="视觉与结构实验室">
           <a className="frame-lab-banner" href={`${import.meta.env.BASE_URL}frame-lab/`}>
             <span className="frame-lab-copy">
-              <span className="frame-lab-kicker"><i aria-hidden="true" />NEW · FRAME / LAB</span>
+              <span className="frame-lab-kicker">FRAME / LAB</span>
               <strong>Dribbble 视觉 × Figma 设计结构</strong>
-              <span className="frame-lab-desc">在统一工作台里拆解视觉语言、图层与 Auto Layout。</span>
-              <span className="frame-lab-tags"><em>12 种视觉语言</em><em>交互工作台</em><em>结构拆解</em><em>组件实验室</em></span>
+              <span className="frame-lab-desc">12 种视觉语言 · 交互工作台 · Auto Layout 结构拆解 · 组件实验室</span>
             </span>
             <span className="frame-lab-cta">打开实验室 <span aria-hidden="true">↗</span></span>
           </a>

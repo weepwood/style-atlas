@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import type { VisualStyle } from '../types/style'
 import { StylePreview } from './StylePreview'
 
@@ -26,6 +27,7 @@ export function StyleCard({
     <article
       className={`style-card ${selected ? 'selected' : ''}`}
       data-style={style.id}
+      style={{ '--card-stagger': (index - 1) % 9 } as CSSProperties}
     >
       <button
         className={`favorite-button ${favorite ? 'active' : ''}`}
@@ -52,9 +54,13 @@ export function StyleCard({
           </div>
           <div className="style-title-row">
             <div><h3>{style.name}</h3><small>{style.en}</small></div>
-            <span className="apply-hint">{selected ? '已应用' : '点击应用'}</span>
+            <span className="apply-hint">{selected ? '✓ 已应用' : '点击应用 ↗'}</span>
           </div>
           <p className="style-summary">{style.summary}</p>
+          <div className="style-palette" aria-hidden="true">
+            {style.palette.slice(0, 5).map((color) => <i key={color} style={{ background: color }} title={color} />)}
+            <span>{style.palette[0]}</span>
+          </div>
         </div>
       </button>
 

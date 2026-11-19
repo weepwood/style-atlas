@@ -163,14 +163,15 @@ function App() {
 
       <main id="top">
         <Hero styleCount={styles.length} onRandom={openRandomStyle} />
-        <section aria-label="视觉与结构实验室" style={{ maxWidth: 1280, margin: '16px auto 34px', padding: '0 24px' }}>
-          <a href={`${import.meta.env.BASE_URL}frame-lab/`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, padding: '22px 26px', borderRadius: 18, background: 'linear-gradient(115deg,#242238,#473a78)', color: '#fff', textDecoration: 'none', boxShadow: '0 10px 28px rgba(21,20,54,.15)' }}>
-            <span style={{ display: 'grid', gap: 7 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', color: '#c6b9ff' }}>NEW · FRAME / LAB</span>
-              <strong style={{ fontSize: 'clamp(18px,2.2vw,26px)', lineHeight: 1.3 }}>Dribbble 视觉 × Figma 设计结构</strong>
-              <span style={{ fontSize: 13, color: '#e6e2fa' }}>12 种视觉语言 · 交互工作台 · Auto Layout 结构拆解 · 组件实验室</span>
+        <section className="frame-lab-wrap" aria-label="视觉与结构实验室">
+          <a className="frame-lab-banner" href={`${import.meta.env.BASE_URL}frame-lab/`}>
+            <span className="frame-lab-copy">
+              <span className="frame-lab-kicker"><i aria-hidden="true" />NEW · FRAME / LAB</span>
+              <strong>Dribbble 视觉 × Figma 设计结构</strong>
+              <span className="frame-lab-desc">在统一工作台里拆解视觉语言、图层与 Auto Layout。</span>
+              <span className="frame-lab-tags"><em>12 种视觉语言</em><em>交互工作台</em><em>结构拆解</em><em>组件实验室</em></span>
             </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', color: '#34255c', borderRadius: 12, padding: '11px 17px', fontWeight: 700, fontSize: 13 }}>打开实验室 ↗</span>
+            <span className="frame-lab-cta">打开实验室 <span aria-hidden="true">↗</span></span>
           </a>
         </section>
         <FilterBar
@@ -217,7 +218,7 @@ function App() {
 
         <ClientAtlas />
 
-        <section className="decision-guide" aria-labelledby="guide-title">
+        <section className="decision-guide" id="decision-guide" aria-labelledby="guide-title">
           <div className="section-heading inverse">
             <div><p className="eyebrow">DECISION GUIDE</p><h2 id="guide-title">不要从“流行”开始选择</h2></div>
             <p>先判断内容密度、品牌气质和用户任务，再决定视觉表现。风格是解决问题的工具，不是页面表面的装饰。</p>
@@ -232,8 +233,17 @@ function App() {
       </main>
 
       <footer className="footer">
-        <div><strong>Style Atlas</strong><p>基于 React、TypeScript 与 Vite 的可扩展前端风格展示项目。</p></div>
-        <a href="#top">回到顶部 ↑</a>
+        <div className="footer-brand">
+          <span className="brand-mark" aria-hidden="true">SA</span>
+          <div><strong>Style Atlas</strong><p>基于 React、TypeScript 与 Vite 的可扩展前端风格展示项目。</p></div>
+        </div>
+        <nav className="footer-nav" aria-label="页脚导航">
+          <a href="#gallery">风格图鉴</a>
+          <a href="#motion-lab">动效实验室</a>
+          <a href="#client-atlas">客户端图鉴</a>
+          <a href={`${import.meta.env.BASE_URL}frame-lab/`}>Frame Lab ↗</a>
+        </nav>
+        <a className="to-top" href="#top">回到顶部 <span aria-hidden="true">↑</span></a>
       </footer>
 
       <StyleDialog style={activeStyle} onClose={() => setActiveStyle(null)} onCopy={copyText} />

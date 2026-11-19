@@ -24,11 +24,9 @@ export function Hero({ styleCount, onRandom }: HeroProps) {
         </dl>
       </div>
       <div className="hero-stage" aria-hidden="true">
-        <div className="orbit orbit-a" /><div className="orbit orbit-b" />
         <div className="floating-card card-glass"><span className="mini-pill">Glass</span><strong>Soft depth</strong><i /></div>
         <div className="floating-card card-brutal"><span>BRUTAL</span><b>RAW<br />ENERGY</b></div>
         <div className="floating-card card-grid"><i /><i /><i /><i /><i /></div>
-        <div className="hero-cursor">VIEW</div>
       </div>
     </section>
   )

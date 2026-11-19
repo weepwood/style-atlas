@@ -23,7 +23,11 @@ export function FilterBar({ categories, activeCategory, query, resultCount, sear
           autoComplete="off"
           onChange={(event) => onQueryChange(event.target.value)}
         />
-        <kbd>/</kbd>
+        {query ? (
+          <button className="search-clear" type="button" aria-label="清除搜索" onClick={() => onQueryChange('')}>×</button>
+        ) : (
+          <kbd>/</kbd>
+        )}
       </label>
       <div className="filter-list" role="group" aria-label="风格分类">
         {categories.map((category) => (
